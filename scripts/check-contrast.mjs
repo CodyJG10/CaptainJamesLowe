@@ -8,8 +8,9 @@
  * link checker — only looking catches it, and only if you look at the right
  * section.
  *
- * Walks every text-bearing element on every page, resolves the nearest opaque
- * background, and computes the WCAG contrast ratio.
+ * Walks every text-bearing element on every page, resolves what is actually
+ * behind it — including overlays, via the compositor rather than the DOM tree
+ * — and computes the WCAG contrast ratio.
  *
  *   node scripts/check-contrast.mjs                  # needs the dev server up
  *   MIN_CONTRAST=4.5 node scripts/check-contrast.mjs # audit the small-text bar
@@ -73,13 +74,53 @@ const PROBE = `(() => {
   };
   const ratio = (a, b) => { const l1 = lum(a), l2 = lum(b); const [hi, lo] = l1 > l2 ? [l1, l2] : [l2, l1]; return (hi + 0.05) / (lo + 0.05); };
 
-  // Walk up until an opaque background is found — that is what the text sits on.
-  const bgOf = (el) => {
-    let n = el;
+  /*
+   * Nearest opaque background among an element's ancestors.
+   *
+   * stopAtOverlay matters: once the walk crosses an absolutely or fixed
+   * positioned box, the ancestors above it are no longer what the element is
+   * painted on — the overlay has been lifted out of the flow and is sitting on
+   * top of something else entirely. Walking past that point is how the header
+   * over the hero video ended up being judged against the light page ground.
+   */
+  const opaqueBgOf = (n, stopAtOverlay) => {
     while (n && n !== document.documentElement) {
-      const c = parse(getComputedStyle(n).backgroundColor);
+      const cs = getComputedStyle(n);
+      const c = parse(cs.backgroundColor);
       if (c && c.a >= 0.95) return c;
+      if (stopAtOverlay && (cs.position === 'absolute' || cs.position === 'fixed')) return null;
       n = n.parentElement;
+    }
+    return null;
+  };
+
+  /*
+   * What is actually behind this text.
+   *
+   * Walking DOM ancestors is right for elements in normal flow, but it is
+   * wrong for an overlay: the site header is absolutely positioned over the
+   * hero video, so its ancestors are transparent and the walk ran all the way
+   * up to <body> and reported the light page ground. The header's paper-on-ink
+   * palette then looked like a catastrophic failure, so it was skipped — and
+   * that blind spot let two real bugs through, both of them dark accent text
+   * left sitting on dark footage.
+   *
+   * So: if no ancestor paints an opaque background, ask the compositor what is
+   * underneath instead. elementsFromPoint returns the visual stack at a point,
+   * which finds the hero (or whatever else) that the overlay is floating on.
+   */
+  const bgOf = (el) => {
+    const own = opaqueBgOf(el, true);
+    if (own) return own;
+
+    const r = el.getBoundingClientRect();
+    const x = Math.min(Math.max(r.left + r.width / 2, 1), innerWidth - 1);
+    const y = Math.min(Math.max(r.top + r.height / 2, 1), innerHeight - 1);
+
+    for (const node of document.elementsFromPoint(x, y)) {
+      if (node === el || node.contains(el)) continue; // skip self and ancestors
+      const c = opaqueBgOf(node);
+      if (c) return c;
     }
     return { r: 255, g: 255, b: 255, a: 1 };
   };
@@ -96,12 +137,6 @@ const PROBE = `(() => {
     if (r.width < 2 || r.height < 2) continue;
     // Skip the visually-hidden helpers.
     if (el.classList.contains('sr-only') || el.classList.contains('gotcha')) continue;
-
-    // The overlay header is the one case this method cannot judge: it is
-    // absolutely positioned over the hero video, so walking DOM ancestors
-    // finds the page ground rather than the dark footage actually behind it.
-    // Its palette is checked against the hero scrim by eye instead.
-    if (el.closest('.site-header.transparent')) continue;
 
     const fg = parse(cs.color); if (!fg || fg.a < 0.1) continue;
     const bg = bgOf(el);
