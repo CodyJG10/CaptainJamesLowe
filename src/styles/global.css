@@ -25,6 +25,48 @@
        at the normal cut.
    ══════════════════════════════════════════════════════════════════════════ */
 
+/* ─────────────────────────────  0. TYPEFACES  ────────────────────────────
+   Self-hosted rather than loaded from Google Fonts.
+
+   The reason is measurable: with the third-party stylesheet, the font files
+   were only discovered after that stylesheet parsed, so the hero painted in
+   Georgia and then reflowed when Cormorant arrived. Because the hero is
+   flex-end aligned, a change in the heading's line height moves the whole
+   block — a 0.055 layout shift that appeared in roughly two runs out of three,
+   and touched 0.109 at its worst.
+
+   Served from our own origin and preloaded in Layout.astro, the files are in
+   flight immediately and beat first paint. It also drops two third-party
+   connections (fonts.googleapis.com and fonts.gstatic.com) from the critical
+   path, and stops leaking every visitor's IP to a third party.
+
+   Both are variable fonts covering the weight axis, so one 37 kB file per
+   family serves the whole site. The unicode-range is Google's own `latin`
+   subset, carried over verbatim.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@font-face {
+	font-family: 'Cormorant Garamond';
+	font-style: normal;
+	font-weight: 400 600;
+	font-display: swap;
+	src: url('/fonts/cormorant-garamond-latin.woff2') format('woff2');
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+		U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+		U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+	font-family: 'Lora';
+	font-style: normal;
+	font-weight: 400 600;
+	font-display: swap;
+	src: url('/fonts/lora-latin.woff2') format('woff2');
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+		U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+		U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* ─────────────────────────────  1. TOKENS  ───────────────────────────── */
 
 :root {
@@ -855,4 +897,170 @@ select.input {
 	clip: rect(0, 0, 0, 0);
 	white-space: nowrap;
 	border: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5. MOTION
+
+   The system is quiet, so the motion is too: things arrive, they do not
+   perform. One easing curve, one distance, one duration family. Nothing
+   bounces, nothing spins, nothing slides sideways.
+
+   THE SAFETY MODEL — this is the part that matters.
+
+   Every hidden-then-revealed effect is scoped to `[data-anim='on']`, an
+   attribute set on <html> by a script in <head> that runs only when
+   JavaScript is available AND the reader has not asked for reduced motion.
+
+   So the failure modes all land on "everything is simply visible":
+     · JS blocked or broken   -> attribute never set -> no element ever hidden
+     · prefers-reduced-motion -> attribute never set -> no element ever hidden
+     · IntersectionObserver missing -> script reveals everything immediately
+
+   Never write a reveal that hides content outside this gate. An animation that
+   fails open is a nice touch; one that fails closed is an invisible website.
+
+   ORDER IS LOAD-BEARING. The `transition` shorthand REPLACES any transition a
+   competing rule set — it does not merge. The hover polish below therefore
+   comes FIRST, and the reveal rule that follows re-states `border-color` in
+   its own transition list. Written the other way round, `.card`'s
+   `transition: border-color` silently wiped out the opacity and transform
+   transitions and every reveal snapped instead of fading. Add new transitions
+   above the reveal block, and add their properties to its list.
+
+   Only `opacity` and `transform` are animated for reveals, so nothing here can
+   move the layout — the site measures CLS ~0 and must stay there.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+	/* Decelerating curve — fast to start, settles gently. */
+	--ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+	--reveal-distance: 16px;
+	--reveal-duration: 0.72s;
+}
+
+/* ── hover and interaction polish (must precede the reveal block) ── */
+
+/* The plate is a mat around a picture; the picture moves inside it, the mat
+   does not. Slow, and small enough to notice only if you are looking. */
+a:hover .plate img,
+.flagship:hover .plate img {
+	transform: scale(1.035);
+}
+
+.nav-list a,
+.arrow-link {
+	position: relative;
+}
+@media (min-width: 1081px) {
+	.nav-list a::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		height: 1px;
+		background: currentColor;
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform 0.32s var(--ease-out);
+	}
+	.nav-list a:hover::after {
+		transform: scaleX(1);
+	}
+	/* The current page is already underlined by its border — no second rule. */
+	.nav-list a[aria-current='page']::after {
+		display: none;
+	}
+}
+
+.btn {
+	transition:
+		background 0.16s ease,
+		border-color 0.16s ease,
+		color 0.16s ease,
+		transform 0.16s var(--ease-out);
+}
+.btn-lg:active {
+	transform: translateY(1px);
+}
+
+/* Cards lift by a hairline, never by a shadow. */
+.card,
+.rate-card,
+.option,
+.side-card {
+	transition: border-color 0.3s var(--ease-out);
+}
+a:hover > .card,
+a.svc-card:hover .card {
+	border-color: color-mix(in srgb, var(--color-accent) 60%, transparent);
+}
+
+/* ── scroll reveal ── */
+
+/* The elements worth revealing. Kept as one list so the behaviour is declared
+   in a single place rather than sprinkled through 26 page templates; the
+   script in Layout.astro observes exactly this selector. Keep the two in step.
+
+   :where() NOT :is() — and this is load-bearing too. :is() takes the
+   specificity of its most specific argument, so one compound selector in the
+   list (`.next li`, a class plus a type) lifted this rule above the reveal
+   rule and content hid correctly then never came back. :where() contributes
+   zero, which keeps the hidden state deliberately weak and lets the reveal
+   always win, however this list grows. */
+[data-anim='on'] :where(
+		.section-head,
+		.plate-figure,
+		.grid > *,
+		.stat,
+		.step,
+		.rate-card,
+		.option,
+		.detail-item,
+		.fee,
+		.inc-item,
+		.entry,
+		.area,
+		.term,
+		.cert,
+		.faq,
+		.example-row,
+		.flagship,
+		.aside,
+		.warning,
+		.facts,
+		.creds,
+		.pull,
+		.next li,
+		.sec
+	) {
+	opacity: 0;
+	transform: translateY(var(--reveal-distance));
+	transition:
+		opacity var(--reveal-duration) var(--ease-out),
+		transform var(--reveal-duration) var(--ease-out),
+		border-color 0.3s var(--ease-out);
+}
+
+[data-anim='on'] [data-revealed] {
+	opacity: 1;
+	transform: none;
+}
+
+/* Stagger. Siblings in a grid enter the viewport together, so they need a
+   deliberate offset or they land as one slab. Capped at the fifth child: past
+   that the wait reads as lag rather than rhythm, and a 29-item delivery log
+   would otherwise take most of a minute to finish arriving. */
+[data-anim='on'] [data-revealed]:nth-child(2) {
+	transition-delay: 60ms;
+}
+[data-anim='on'] [data-revealed]:nth-child(3) {
+	transition-delay: 120ms;
+}
+[data-anim='on'] [data-revealed]:nth-child(4) {
+	transition-delay: 180ms;
+}
+[data-anim='on'] [data-revealed]:nth-child(n + 5) {
+	transition-delay: 220ms;
 }

@@ -56,7 +56,13 @@ understating a ten-day job by about 20%.
 | `scripts/optimize-photos.mjs` | EXIF-rotates, caps dimensions, recompresses into `src/assets/cjl/` |
 | `scripts/generate-brand-assets.mjs` | Favicons, `.ico`, webmanifest and the 1200×630 OG card, all from the logo + brand ink |
 | `scripts/shoot.mjs` | Full-page screenshots via headless Chrome — for review, not part of the build |
-| `scripts/check-contrast.mjs` | Walks every page for text that is unreadable against its background. Run it after touching colour |
+| `scripts/check-build.mjs` | `npm run check` — JSON-LD parses, no missing alt, no broken internal links, titles in budget |
+| `scripts/check-contrast.mjs` | `npm run check:contrast` — walks every page for text unreadable against its background. Run after touching colour |
+
+```bash
+npm run build && npm run check      # static checks over dist/
+npm run dev &  npm run check:contrast   # needs a running server
+```
 
 ---
 
@@ -96,6 +102,41 @@ display cut. Below the fold the page resolves into the light editorial ground
 and stays there. The dark bands already in the design — the delivery-vs-transport
 section, the footer — give it company so it does not read as a one-off.
 
+### Motion
+
+Quiet, like the rest of it: one easing curve, one distance, one duration.
+Things arrive; nothing performs. It lives in section 5 of `global.css` plus two
+inline scripts in `Layout.astro`.
+
+- **Scroll reveal** — a 16px rise and fade as elements enter, staggered across
+  grid siblings and capped at the fifth child so a 29-item log does not take a
+  minute to finish arriving.
+- **Hero entrance** — the heading rises in two lines, then the kicker, lede,
+  buttons and note fall in behind it, and the rule under the kicker draws
+  itself. The heading deliberately does **not** fade: an element at opacity 0
+  has not painted, and fading the LCP element cost 390ms of LCP on throttled 3G.
+- **Counting figures** — the stat rows count up when they scroll into view.
+  Only plain integers are touched and the final text is restored verbatim; the
+  figures are already tabular, so the width never jitters.
+- **Hover** — photographs scale 3.5% inside their (unmoving) mat, nav links
+  draw an underline from the left, cards warm their border.
+
+**Two things in that CSS are load-bearing, and both have already broken once:**
+
+1. **The gate fails open.** Everything hidden-then-revealed is scoped to
+   `[data-anim='on']`, set on `<html>` by a `<head>` script only when JS runs
+   *and* reduced motion is not requested. JS blocked, a script error, or a
+   motion preference all mean the attribute is absent and nothing is ever
+   hidden. Never write a reveal outside that gate — one that fails closed is an
+   invisible website.
+2. **`:where()`, not `:is()`, and order matters.** `:is()` takes the
+   specificity of its most specific argument, which once lifted the hidden rule
+   above the reveal rule — content hid and never came back. Separately, the
+   `transition` shorthand *replaces* rather than merges, so `.card`'s
+   `transition: border-color` silently wiped the opacity and transform
+   transitions and every reveal snapped. The hover polish therefore comes
+   *before* the reveal block, which re-states `border-color` in its own list.
+
 ---
 
 ## Performance
@@ -104,13 +145,23 @@ Measured on the built site, homepage, headless Chrome:
 
 | | No throttling | Fast 3G + 4× CPU |
 | --- | --- | --- |
-| LCP | 128 ms | **512 ms** |
+| LCP | 140 ms | **564 ms** |
+| FCP | 140 ms | 516 ms |
 | CLS | 0 | 0 |
-| DOMContentLoaded | 57 ms | 765 ms |
 
 The LCP element is the hero **heading**, not the poster — Chrome discounts an
 image that fills the viewport, treating it as a background. That is a good
-outcome: LCP then depends only on CSS and the webfont.
+outcome: LCP then depends only on CSS and the fonts.
+
+**Fonts are self-hosted** (`public/fonts/`, `@font-face` at the top of
+`global.css`, preloaded in `Layout.astro`) rather than loaded from Google. With
+the third-party stylesheet the font files were only discovered after it parsed,
+so the hero painted in Georgia and reflowed when Cormorant arrived — and because
+the hero is flex-end aligned, that moved the whole block. It measured a 0.055
+shift in roughly two runs of three and touched 0.109 at worst. Self-hosted and
+preloaded, CLS is a stable 0. It also drops two third-party connections from the
+critical path and stops leaking every visitor's IP to a third party. Both faces
+are variable fonts: one 37 kB file each.
 
 **The hero video never touches the critical path.** It ships with no `src`; a
 script attaches one only after `load`, and only on screens over 860px with no

@@ -75,5 +75,9 @@ if (widths.length === 0) widths.push(src.width);
 		height: 100%;
 		object-fit: cover;
 		display: block;
+		/* The hover scale itself lives in the motion layer of global.css, where
+		   it can be scoped to a card that is actually a link. The transition
+		   sits here so it travels with the component. */
+		transition: transform 0.62s cubic-bezier(0.22, 0.61, 0.36, 1);
 	}
 </style>

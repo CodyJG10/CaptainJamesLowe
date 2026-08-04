@@ -198,6 +198,94 @@ const { kicker, headingTop, headingBottom, lede, note } = Astro.props;
 		width: 100%;
 	}
 
+	/*
+	 * The entrance. Runs on load rather than on scroll — this is the top of the
+	 * page, there is nothing to scroll into.
+	 *
+	 * LCP NOTE: the heading is the largest contentful paint on this page, so it
+	 * gets NO animation-delay. An element still at opacity 0 has not painted,
+	 * and every millisecond of delay lands directly on the LCP figure. It
+	 * starts immediately and everything else falls in behind it.
+	 */
+	@keyframes hero-rise {
+		from {
+			opacity: 0;
+			transform: translateY(22px);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+
+	/* The heading moves but never fades. An element sitting at opacity 0 has
+	   not painted, so fading the LCP element pushes the LCP measurement out by
+	   most of the fade — it cost 390ms on throttled 3G when this shared the
+	   keyframes below. Sliding at full opacity paints immediately and reads
+	   just as well over the video. */
+	@keyframes hero-rise-opaque {
+		from {
+			transform: translateY(22px);
+		}
+		to {
+			transform: none;
+		}
+	}
+
+	:global([data-anim='on']) .hero-kicker,
+	:global([data-anim='on']) .hero-lede,
+	:global([data-anim='on']) .hero-actions,
+	:global([data-anim='on']) .hero-note {
+		opacity: 0;
+		animation: hero-rise 1s var(--ease-out) forwards;
+	}
+
+	/* The heading leads, in two lines. */
+	:global([data-anim='on']) .hero-heading span {
+		animation: hero-rise-opaque 0.95s var(--ease-out) forwards;
+	}
+	:global([data-anim='on']) .hero-heading span:nth-child(2) {
+		animation-delay: 90ms;
+	}
+	/* Then the frame it sits in. */
+	:global([data-anim='on']) .hero-kicker {
+		animation-delay: 200ms;
+	}
+	:global([data-anim='on']) .hero-lede {
+		animation-delay: 300ms;
+	}
+	:global([data-anim='on']) .hero-actions {
+		animation-delay: 400ms;
+	}
+	:global([data-anim='on']) .hero-note {
+		animation-delay: 490ms;
+	}
+
+	/* The rule under the kicker draws itself rather than appearing. It is a
+	   separate layer over the existing border so the border still holds the
+	   space when motion is off. */
+	:global([data-anim='on']) .hero-kicker::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: -1px;
+		height: 1px;
+		background: var(--color-accent-300);
+		transform: scaleX(0);
+		transform-origin: left;
+		animation: rule-draw 1.1s var(--ease-out) 0.44s forwards;
+	}
+	@keyframes rule-draw {
+		to {
+			transform: scaleX(1);
+		}
+	}
+
+	.hero-kicker {
+		position: relative;
+	}
+
 	.hero-kicker {
 		font-family: var(--font-heading);
 		font-weight: var(--font-heading-weight);

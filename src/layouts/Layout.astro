@@ -143,14 +143,38 @@ const graph = {
 		<meta name="twitter:description" content={description} />
 		<meta name="twitter:image" content={ogImageUrl} />
 
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		{/*
+		  Fonts are self-hosted (see the @font-face block in global.css) and
+		  preloaded here so they are in flight with the stylesheet rather than
+		  after it. Both faces are used above the fold on every page — the
+		  headings in Cormorant, the body in Lora — so both are worth preloading;
+		  a preload the page does not use is a wasted request, and these are not.
+		*/}
 		<link
-			rel="stylesheet"
-			href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Lora:wght@400;600&display=swap"
+			rel="preload"
+			as="font"
+			type="font/woff2"
+			href="/fonts/cormorant-garamond-latin.woff2"
+			crossorigin
 		/>
+		<link rel="preload" as="font" type="font/woff2" href="/fonts/lora-latin.woff2" crossorigin />
 
 		<script type="application/ld+json" set:html={JSON.stringify(graph)} is:inline />
+
+		{/*
+		  Opt in to motion. This runs in <head>, before the body paints, so
+		  elements that will animate in are never briefly visible first.
+
+		  Everything in the motion layer of global.css hangs off this attribute.
+		  If this script does not run — JS disabled, CSP, an error above it — or
+		  if the reader prefers reduced motion, the attribute is absent and not
+		  one element is ever hidden. Fail open, always.
+		*/}
+		<script is:inline>
+			if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+				document.documentElement.dataset.anim = 'on';
+			}
+		</script>
 
 		{
 			site.gaMeasurementId && (
@@ -179,5 +203,96 @@ const graph = {
 			<slot />
 		</main>
 		<Footer />
+
+		<script is:inline>
+			(() => {
+				if (document.documentElement.dataset.anim !== 'on') return;
+
+				/* Must match the selector list in the motion layer of global.css. */
+				const TARGETS = [
+					'.section-head', '.plate-figure', '.grid > *', '.stat', '.step',
+					'.rate-card', '.option', '.detail-item', '.fee', '.inc-item',
+					'.entry', '.area', '.term', '.cert', '.faq', '.example-row',
+					'.flagship', '.aside', '.warning', '.facts', '.creds', '.pull',
+					'.next li', '.sec',
+				].join(',');
+
+				const els = document.querySelectorAll(TARGETS);
+				const revealAll = () => els.forEach((el) => el.setAttribute('data-revealed', ''));
+
+				// Without IntersectionObserver the content would stay hidden forever.
+				if (!('IntersectionObserver' in window)) return revealAll();
+
+				const io = new IntersectionObserver(
+					(entries) => {
+						for (const entry of entries) {
+							if (!entry.isIntersecting) continue;
+							entry.target.setAttribute('data-revealed', '');
+							io.unobserve(entry.target); // reveal once; never re-hide on scroll up
+						}
+					},
+					// Fire a little before the element reaches the fold, so it has
+					// finished arriving by the time it is properly in view.
+					{ rootMargin: '0px 0px -10% 0px', threshold: 0.01 },
+				);
+
+				els.forEach((el) => io.observe(el));
+
+				/* Belt and braces: if anything is still hidden well after load —
+				   an observer that never fired, a zero-height container — show it.
+				   Hidden content is a bug; a missed animation is not. */
+				window.addEventListener('load', () => {
+					setTimeout(() => {
+						els.forEach((el) => {
+							if (el.hasAttribute('data-revealed')) return;
+							const r = el.getBoundingClientRect();
+							if (r.top < window.innerHeight && r.bottom > 0) {
+								el.setAttribute('data-revealed', '');
+							}
+						});
+					}, 1200);
+				});
+
+				/* Counting figures. Only plain integers are touched, and the final
+				   text is restored verbatim rather than reformatted. The figures
+				   are already set in tabular numerals, so the width never jitters
+				   as the digits change. */
+				const counters = [...document.querySelectorAll('.stat-value')].filter((el) =>
+					/^\d{1,4}$/.test(el.textContent.trim()),
+				);
+
+				if (counters.length) {
+					const countIO = new IntersectionObserver(
+						(entries) => {
+							for (const entry of entries) {
+								if (!entry.isIntersecting) continue;
+								const el = entry.target;
+								countIO.unobserve(el);
+
+								const final = el.textContent.trim();
+								const target = Number(final);
+								// Small numbers have nothing to count through.
+								if (target < 5) continue;
+
+								const DURATION = 1100;
+								let started = null;
+
+								const tick = (now) => {
+									started ??= now;
+									const p = Math.min((now - started) / DURATION, 1);
+									// Ease out — decelerates into the real figure.
+									const eased = 1 - Math.pow(1 - p, 3);
+									el.textContent = p < 1 ? String(Math.round(target * eased)) : final;
+									if (p < 1) requestAnimationFrame(tick);
+								};
+								requestAnimationFrame(tick);
+							}
+						},
+						{ threshold: 0.6 },
+					);
+					counters.forEach((el) => countIO.observe(el));
+				}
+			})();
+		</script>
 	</body>
 </html>
