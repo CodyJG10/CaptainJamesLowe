@@ -12,15 +12,20 @@
  *
  * PERFORMANCE — the part that matters more than the look:
  *
- *   · The POSTER is the LCP element. It is a real <Image>, eager, high
- *     priority, with a responsive srcset. It is what gets measured, and it
- *     paints without waiting on any video byte.
  *   · The <video> ships with NO src attribute. Nothing is fetched until the
- *     script decides it should be, which is after `load` — so the video can
- *     never compete with the poster, the fonts or the CSS.
+ *     script decides it should be, which is after `load` — so no video byte
+ *     is ever on the critical path, whatever the network is doing.
  *   · Small screens, reduced-motion users and anyone on Save-Data or a 2g/3g
  *     connection never fetch the video at all. They keep the poster, which is
- *     a perfectly good hero.
+ *     a perfectly good hero. Verified: zero requests for the mp4 at 390px.
+ *   · The poster is a real <Image> — eager, high priority, responsive srcset —
+ *     so the hero looks finished the moment anything paints.
+ *
+ * Measured LCP is the hero HEADING, not the poster: Chrome discounts an image
+ * that fills the viewport, treating it as a background, so the largest counted
+ * paint is the display type. That is a good outcome — LCP then depends only on
+ * CSS and the font, and 512 ms on throttled Fast 3G with 4x CPU bears it out.
+ * Either way the video is not on that path, which is the point.
  *
  * A hero video that costs three seconds of LCP is worse than no hero video.
  */
@@ -214,7 +219,9 @@ const { kicker, headingTop, headingBottom, lede, note } = Astro.props;
 		font-family: var(--font-heading);
 		/* Display sizes take the normal cut — the bigger it is, the lighter. */
 		font-weight: 400;
-		font-size: clamp(40px, 6.4vw, 88px);
+		/* The 8vw floor keeps "We move your boat" on one line at 390px — below
+		   that it breaks mid-phrase and the two-line structure falls apart. */
+		font-size: clamp(34px, 8vw, 88px);
 		line-height: 1.03;
 		letter-spacing: -0.018em;
 		margin: 0 0 clamp(20px, 2.6vw, 30px);

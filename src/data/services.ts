@@ -92,7 +92,7 @@ export const services: Service[] = [
 		cardImage: imgHelmTwilight,
 		cardImageAlt: 'A sailboat’s wheel and binnacle compass lit at twilight',
 		title: 'Hands-on training',
-		metaTitle: 'Boat Handling Training | Hands-On Instruction Aboard Your Own Vessel',
+		metaTitle: 'Boat Handling Training | Hands-On, Aboard Your Own Boat',
 		metaDescription:
 			'Private boat handling and navigation training aboard your own boat, taught by a USCG 200-ton master. Docking, anchoring, systems, weather and close-quarters work.',
 		hero: {
@@ -271,7 +271,7 @@ export const services: Service[] = [
 		cardImage: imgTwinOutboards,
 		cardImageAlt: 'Looking aft from the helm seat past twin outboards to the wake astern',
 		title: 'Captain for hire',
-		metaTitle: 'Captain for Hire | Licensed Boat Captain for Deliveries and Sea Trials',
+		metaTitle: 'Captain for Hire | Licensed Boat Captain by the Day',
 		metaDescription:
 			'Hire a USCG 200-ton licensed captain by the day — vessel relocations, sea trials for dealers and brokers, new-owner orientation, docking and navigation assistance.',
 		hero: {
@@ -309,7 +309,7 @@ export const services: Service[] = [
 		cardImage: imgForedeck,
 		cardImageAlt: 'The foredeck of a motor yacht underway toward a green coastline',
 		title: 'Sea trials',
-		metaTitle: 'Sea Trial Captain | Independent Captain for Boat Sea Trials in Florida',
+		metaTitle: 'Sea Trial Captain | Independent Captain, Florida',
 		metaDescription:
 			'A USCG-licensed captain aboard for your sea trial. Independent evaluation of handling, systems and running condition for buyers, dealers and brokers in central and south Florida.',
 		hero: {
@@ -348,7 +348,7 @@ export const services: Service[] = [
 		cardImage: imgWindIndicator,
 		cardImageAlt: 'A masthead wind direction and velocity indicator display',
 		title: 'A sailboat delivery perspective',
-		metaTitle: 'Sailboat Delivery Captain | Sailing Yacht Relocation by Licensed Master',
+		metaTitle: 'Sailboat Delivery Captain | Sailing Yacht Relocation',
 		metaDescription:
 			'Sailing yacht deliveries by a USCG 200-ton master with auxiliary sail endorsement. Why sail passages differ from power, and what that means for crew, timing and cost.',
 		hero: {

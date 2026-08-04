@@ -143,7 +143,7 @@ export const passages: Passage[] = [
 		cardImage: imgBahamasBeach,
 		cardImageAlt:
 			'A shaded beach bar deck with a cable-spool table, palm trees and turquoise water beyond',
-		metaTitle: 'Bahamas Yacht Delivery | Crossing to the Islands with a Licensed Captain',
+		metaTitle: 'Bahamas Yacht Delivery | Florida to the Islands by Captain',
 		metaDescription:
 			'Vessel relocation between Florida and the Bahamas. Gulf Stream timing, sea state, routes and distances, cruising permit fees, and clearing customs in both directions.',
 		hero: {
@@ -208,7 +208,7 @@ export const passages: Passage[] = [
 			'The 154-mile canal route straight across Florida — five locks, and an air draft limit that decides everything.',
 		cardImage: imgOkeechobeeMap,
 		cardImageAlt: 'A map of the Okeechobee Waterway crossing the Florida peninsula',
-		metaTitle: 'Okeechobee Waterway Delivery | Crossing Florida Stuart to Fort Myers',
+		metaTitle: 'Okeechobee Waterway Delivery | Stuart to Fort Myers',
 		metaDescription:
 			'Yacht delivery across Florida on the Okeechobee Waterway. 154 miles, five locks, bridge clearances and the 49-foot Port Mayaca limit that decides whether you can cross.',
 		hero: {
@@ -254,7 +254,7 @@ export const passages: Passage[] = [
 			'The Mississippi system and its tributaries — currents, tows, locks and very few fuel stops.',
 		cardImage: imgRiverLock,
 		cardImageAlt: 'A river lock with its steel gates closed and concrete chamber walls',
-		metaTitle: 'Inland River Yacht Delivery | Mississippi, Ohio and Tennessee Rivers',
+		metaTitle: 'Inland River Yacht Delivery | Mississippi, Ohio, Tennessee',
 		metaDescription:
 			'Yacht delivery on America’s navigable inland rivers — Mississippi, Ohio, Tennessee, Cumberland, Illinois and the Tenn-Tom. Currents, locks, tows and fuel planning.',
 		hero: {
@@ -285,7 +285,7 @@ export const passages: Passage[] = [
 		cardImage: imgBigBendChart,
 		cardImageAlt:
 			'A nautical chart of Florida’s Gulf coast showing a plotted magenta course across the Big Bend',
-		metaTitle: 'Gulf of Mexico Big Bend Crossing | Carrabelle to Tarpon Springs by Captain',
+		metaTitle: 'Gulf Big Bend Crossing | Carrabelle to Tampa Bay by Captain',
 		metaDescription:
 			'Crossing Florida’s Big Bend in the Gulf of Mexico — Carrabelle to Crystal River, Tarpon Springs, Clearwater and Tampa. Distances, offshore exposure and emergency procedure.',
 		hero: {

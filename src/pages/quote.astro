@@ -466,7 +466,7 @@ const description =
 					<h2 class="side-head">Before you send</h2>
 					<p class="side-body">
 						Have the vessel’s length overall, draft, air draft and honest cruising speed to
-						hand. Speed drives the day count, and the day count drives the price — see
+						hand. Speed drives the day count, and the day count drives the price — see{' '}
 						<a href="/rates">rates and fees</a>.
 					</p>
 				</div>
@@ -551,7 +551,15 @@ const description =
 		border-top: 0;
 		padding-top: 0;
 	}
+	/*
+	 * A <legend> normally sits IN the fieldset's top border, punching a gap in
+	 * it — which leaves a stray rule running off to the right of the heading.
+	 * Floating it takes it out of that slot so the border draws unbroken above,
+	 * while keeping the legend/fieldset semantics screen readers rely on.
+	 */
 	.sec-legend {
+		float: left;
+		width: 100%;
 		display: flex;
 		align-items: baseline;
 		gap: var(--space-3);
@@ -561,6 +569,11 @@ const description =
 		line-height: 1.1;
 		padding: 0;
 		margin-bottom: var(--space-3);
+	}
+	.sec::after {
+		content: '';
+		display: block;
+		clear: both;
 	}
 	.sec-num {
 		font-size: 13px;

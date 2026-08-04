@@ -136,8 +136,13 @@ const personSchema = {
 	</section>
 
 	<section class="section">
-		<div class="container prose prose-wide">
-			{closing.map((p) => <p set:html={inline(p)} />)}
+		<div class="container">
+			{/* Nested rather than putting .prose on .container itself — the
+			    container's `margin: 0 auto` would centre the measure, and every
+			    other block on this page starts at the gutter. */}
+			<div class="prose prose-wide">
+				{closing.map((p) => <p set:html={inline(p)} />)}
+			</div>
 		</div>
 	</section>
 

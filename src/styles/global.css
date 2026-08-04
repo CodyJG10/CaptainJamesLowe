@@ -727,6 +727,12 @@ select.input {
 .split-reverse {
 	grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
 }
+/* Centering is right when the two columns are close in height. When one is a
+   short heading and the other a long list, it strands the short one in the
+   middle of a void — these pairs align to the top instead. */
+.split-top {
+	align-items: start;
+}
 @media (max-width: 860px) {
 	.split,
 	.split-reverse {

@@ -56,6 +56,20 @@ scare off the people who actually hire him.
 | --- | --- | --- |
 | `hero-passage.mp4` | Pexels [7649033](https://www.pexels.com/video/7649033/) | Aerial of a ketch under sail. Trimmed to an 18s loop (12–30s), scaled to 1280px, H.264 CRF 33 → 2.1 MB. A VP9/WebM encode was tested and came out *larger* than the H.264, so only the MP4 ships. |
 
+The exact encode, so it can be reproduced or tightened (raise `-crf` to shrink):
+
+```bash
+ffmpeg -ss 12 -t 18 -i 7649033.mp4 -an \
+  -vf "scale=1280:-2,fps=24" \
+  -c:v libx264 -profile:v high -crf 33 -preset veryslow \
+  -pix_fmt yuv420p -movflags +faststart \
+  public/video/hero-passage.mp4
+```
+
+The poster still is frame 14s of the same source, scaled to 1920px wide, and
+lives at `stock/hero-passage-poster.jpg`. If the video is ever replaced, replace
+the poster from the same clip — they have to be the same water.
+
 The captain's own three clips on the old site (`BikeOnICW.mp4`,
 `Machinery_spaces.mp4`, `Andy_oil.mp4`) were downloaded but **not used**: they
 are 12 MB, 144 MB and 28 MB of unedited engine-room and dockside footage, not
