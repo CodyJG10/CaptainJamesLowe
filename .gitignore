@@ -22,3 +22,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Harvested source media — 219MB of originals, regenerate with scripts/harvest-photos.sh
+scripts/.harvest/
