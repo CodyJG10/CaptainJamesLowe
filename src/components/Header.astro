@@ -7,9 +7,10 @@
  * in paper-on-ink: same layout, inverted palette, no bottom rule — the hero's
  * own edge does that job.
  *
- * The mobile panel is a hidden checkbox driving a sibling selector, so the nav
- * opens and closes with zero JavaScript. One small inline script closes it on
- * Escape and on navigation, which CSS alone cannot do.
+ * Below 1080px the nav becomes a full-screen panel sliding in from the right.
+ * It is driven by a hidden checkbox and a sibling selector, so it opens and
+ * closes with zero JavaScript; one small inline script adds Escape-to-close and
+ * closes it on navigation, which CSS alone cannot do.
  */
 import { Image } from 'astro:assets';
 import { site, nav } from '../data/site';
@@ -47,6 +48,16 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
 		</label>
 
 		<nav class="nav-panel" aria-label="Primary">
+			{/* Panel-only header. On desktop the panel is just a row of links and
+			    this is hidden; on mobile it covers the page, so it needs its own
+			    identity and a way out. */}
+			<div class="panel-top">
+				<span class="panel-brand">Captain James Lowe</span>
+				<label class="nav-close" for="nav-toggle" aria-label="Close menu">
+					<span></span><span></span>
+				</label>
+			</div>
+
 			<ul class="nav-list">
 				{
 					nav.map((item) => (
@@ -59,7 +70,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
 				}
 			</ul>
 			<div class="nav-actions">
-				<a class="btn btn-primary" href="/quote">Get a delivery quote</a>
+				<a class="btn btn-primary" href="/quote">Get a quote</a>
 				<a class="nav-phone" href={site.phoneHref}>{site.phoneDisplay}</a>
 			</div>
 		</nav>
@@ -238,37 +249,109 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
 		outline-offset: 2px;
 	}
 
+	/* The panel-only header is desktop-hidden; it exists for the mobile overlay. */
+	.panel-top {
+		display: none;
+	}
+
 	@media (max-width: 1080px) {
 		.nav-burger {
 			display: flex;
 		}
+
+		/*
+		 * Full-screen panel, sliding in from the right.
+		 *
+		 * visibility (not display) so the slide can animate and so the links
+		 * stay out of the accessibility tree and out of tab order while closed.
+		 * The visibility transition is delayed on the way out only, so the panel
+		 * remains rendered for the length of the slide and then disappears.
+		 */
 		.nav-panel {
-			position: absolute;
-			left: 0;
-			right: 0;
-			top: 100%;
+			position: fixed;
+			inset: 0;
+			z-index: 90;
 			flex-direction: column;
 			align-items: stretch;
 			gap: 0;
-			padding: var(--space-4) var(--gutter) var(--space-6);
+			padding: 0 var(--gutter) calc(var(--space-8) + env(safe-area-inset-bottom));
+			overflow-y: auto;
+			overscroll-behavior: contain;
 			background: var(--color-bg);
-			border-bottom: 1px solid var(--color-divider);
-			box-shadow: var(--shadow-md);
-			/* Collapsed by default; the checkbox reveals it. */
-			display: none;
+			transform: translateX(100%);
+			visibility: hidden;
+			transition:
+				transform 0.34s var(--ease-out),
+				visibility 0s 0.34s;
 		}
-		/* The panel drops onto the page ground even in overlay state, so it
-		   needs the light palette back or the links vanish. */
-		.transparent .nav-panel {
-			background: var(--color-bg);
-			color: var(--color-text);
+
+		/*
+		 * The panel covers the page on its own paper ground, so it needs the
+		 * LIGHT palette regardless of what the header is doing over the hero.
+		 * All five tokens — missing --color-accent-text here is what left the
+		 * quote button and phone number as pale gold on near-white.
+		 */
+		.site-header .nav-panel,
+		.site-header.transparent .nav-panel {
+			color: #201f1d;
 			--color-text: #201f1d;
 			--color-divider: color-mix(in srgb, #201f1d 16%, transparent);
 			--color-accent: #b68235;
+			--color-accent-text: var(--color-accent-700);
+			--color-accent-display: var(--color-accent-600);
 		}
+
 		.nav-toggle:checked ~ .nav-panel {
-			display: flex;
+			transform: none;
+			visibility: visible;
+			transition:
+				transform 0.34s var(--ease-out),
+				visibility 0s 0s;
 		}
+
+		/* Hold the page still behind the overlay. */
+		:global(html:has(.nav-toggle:checked)) {
+			overflow: hidden;
+		}
+
+		.panel-top {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: var(--space-4);
+			padding-block: var(--space-4);
+			margin-bottom: var(--space-4);
+			border-bottom: 1px solid var(--color-divider);
+		}
+		.panel-brand {
+			font-family: var(--font-heading);
+			font-weight: var(--font-heading-weight);
+			font-size: 17px;
+		}
+		.nav-close {
+			position: relative;
+			width: 44px;
+			height: 44px;
+			flex: none;
+			cursor: pointer;
+			border: 1px solid var(--color-divider);
+			border-radius: var(--radius-md);
+		}
+		.nav-close span {
+			position: absolute;
+			left: 12px;
+			right: 12px;
+			top: 50%;
+			height: 1px;
+			background: var(--color-text);
+		}
+		.nav-close span:first-child {
+			transform: rotate(45deg);
+		}
+		.nav-close span:last-child {
+			transform: rotate(-45deg);
+		}
+
 		.nav-list {
 			flex-direction: column;
 			align-items: stretch;
@@ -279,21 +362,25 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
 		}
 		.nav-list a {
 			display: block;
-			padding: var(--space-3) 0;
-			font-size: 17px;
+			padding: var(--space-4) 0;
+			font-size: 21px;
 			border-bottom: 0;
 		}
 		.nav-actions {
 			flex-direction: column;
 			align-items: stretch;
 			gap: var(--space-3);
-			margin-top: var(--space-4);
+			margin-top: var(--space-6);
+		}
+		.nav-actions .btn {
+			font-size: 16px;
+			padding-block: var(--space-3);
 		}
 		.nav-phone {
 			display: block;
 			text-align: center;
 			font-family: var(--font-heading);
-			font-size: 15px;
+			font-size: 19px;
 			color: var(--color-accent-text);
 			text-decoration: none;
 			font-variant-numeric: tabular-nums;

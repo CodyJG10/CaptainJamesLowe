@@ -185,10 +185,19 @@ const { kicker, headingTop, headingBottom, lede, note } = Astro.props;
 			linear-gradient(to right, rgba(20, 19, 17, 0.6) 0%, rgba(20, 19, 17, 0) 62%);
 	}
 
-	/* The gold hairline — stroke, the way the system wants its color used. */
+	/*
+	 * The gold hairline — stroke, the way the system wants its color used.
+	 *
+	 * The header is absolutely positioned over this hero, so the frame's top
+	 * edge has to clear it. On desktop the inset is small and the header sits
+	 * comfortably inside; on narrow screens the header is proportionally much
+	 * taller and the rule cut straight through the utility bar and the phone
+	 * number. --hero-frame-top holds it below the header there.
+	 */
 	.hero-frame {
 		position: absolute;
-		inset: clamp(12px, 1.6vw, 22px);
+		inset: var(--hero-frame-top, clamp(12px, 1.6vw, 22px)) clamp(12px, 1.6vw, 22px)
+			clamp(12px, 1.6vw, 22px);
 		border: 1px solid color-mix(in srgb, var(--color-accent-300) 42%, transparent);
 		pointer-events: none;
 	}
@@ -392,7 +401,11 @@ const { kicker, headingTop, headingBottom, lede, note } = Astro.props;
 	}
 
 	@media (max-width: 860px) {
+		/* Header bottom measures ~103px across every breakpoint; 112 clears it
+		   with a little air. On desktop the rule passes harmlessly through the
+		   gap between the utility bar and the nav row, so it stays put there. */
 		.hero {
+			--hero-frame-top: 112px;
 			min-height: min(88svh, 720px);
 			align-items: flex-end;
 		}
