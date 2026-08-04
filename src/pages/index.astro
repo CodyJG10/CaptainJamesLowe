@@ -1,0 +1,504 @@
+---
+import Layout from '../layouts/Layout.astro';
+import HeroVideo from '../components/HeroVideo.astro';
+import Plate from '../components/Plate.astro';
+import FinalCta from '../components/FinalCta.astro';
+import { site } from '../data/site';
+import { services } from '../data/services';
+import { passages } from '../data/passages';
+import { deliveries, deliveryCount } from '../data/deliveries';
+import { areaCount } from '../data/serviceArea';
+import { inline } from '../lib/inline';
+
+import imgCaptain from '../assets/cjl/site/captain-james-lowe-florida.jpg';
+import imgHelmView from '../assets/cjl/site/helm-view-offshore.jpg';
+import imgChartPlot from '../assets/cjl/stock/nautical-chart-plot.jpg';
+
+/**
+ * Homepage figures.
+ *
+ * Every one of these is checkable against something published on the site —
+ * that is the whole point. The design draft opened with "Thirty-odd years" and
+ * "24 States", neither of which the source material supports; a prospect who
+ * asks "how many years exactly?" should not catch his own website inventing
+ * things. See README, "Claims rewritten".
+ */
+const stats = [
+	{ value: '200', label: 'Ton USCG master license' },
+	{ value: String(deliveryCount), label: 'Documented deliveries' },
+	{ value: '17', label: 'Marine certifications held' },
+	{ value: '365', label: 'Days a year — no season' },
+];
+
+const bookingSteps = [
+	{
+		title: 'Send the vessel and the route',
+		body: 'The delivery form takes about five minutes. It captures what is needed to chart the passage — length, draft, air draft, honest cruising speed, departure and destination.',
+	},
+	{
+		title: 'The captain reviews it personally',
+		body: 'Within 24 hours. Not a dispatch desk, not a form response — the person who will be aboard reads what you sent.',
+	},
+	{
+		title: 'The route gets charted and timed',
+		body: 'Optimal course allowing for safety, distance, water depth and bridge clearances, and a day count built from your vessel’s actual speed.',
+	},
+	{
+		title: 'You get an estimate by email',
+		body: 'No obligation. Once a deposit is received, the estimate becomes the contract and your dates are held on the calendar.',
+	},
+];
+
+const threeTrades = [
+	{
+		label: 'What we do',
+		title: 'Yacht delivery',
+		body: 'Your vessel moves under its own power, crewed by a captain and deckhands — coastlines, the Intracoastal, canals, inland rivers, offshore passages.',
+		ours: true,
+	},
+	{
+		label: 'A different trade',
+		title: 'Yacht transport',
+		body: 'The boat is hauled over the road on a trailer behind a truck. Different insurer, different license, and it never touches water. Required above 8.5 ft of beam or 13.6 ft of height.',
+		ours: false,
+	},
+	{
+		label: 'A different trade',
+		title: 'Yacht shipping',
+		body: 'Your boat rides on a bigger boat. You may still need a captain standing by to pilot the vessel into the loading area when called.',
+		ours: false,
+	},
+];
+
+/** Four vessels from the log, chosen to show the range of boat and route. */
+const featuredDeliveries = [
+	'56 ft Sea Ray',
+	'Princess 75',
+	'Tayana 55',
+	'Grafton Steel Trawler 47',
+]
+	.map((v) => deliveries.find((d) => d.vessel === v))
+	.filter((d): d is NonNullable<typeof d> => Boolean(d));
+
+const title = 'Yacht Delivery by Licensed Captain | Move Your Boat | Captain James Lowe';
+const description =
+	'Year-round yacht delivery along the Atlantic and Gulf coasts, the ICW, inland rivers, the Great Loop, Florida, the Bahamas and the Caribbean. Sail or power, moved under their own power by a USCG 200-ton licensed master.';
+---
+
+<Layout {title} {description} transparentHeader>
+	<HeroVideo
+		kicker="Yacht delivery · Relief captain · Hands-on training"
+		headingTop="We move your boat"
+		headingBottom="on its own bottom."
+		lede="Year-round yacht delivery along the Atlantic and Gulf coasts, the Intracoastal, the inland rivers, the Great Loop, Florida, the Bahamas and the Caribbean. Sail or power, with or without owners aboard — navigated by a licensed 200-ton master and a professional crew."
+		note="Most estimates go back out within 24 hours."
+	/>
+
+	<!-- ── figures ── -->
+	<section class="band-surface">
+		<div class="container">
+			<div class="stat-row">
+				{
+					stats.map((s) => (
+						<div class="stat">
+							<span class="stat-value">{s.value}</span>
+							<span class="stat-label">{s.label}</span>
+						</div>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<!-- ── what we do ── -->
+	<section class="section" id="what-we-do">
+		<div class="container">
+			<header class="section-head">
+				<p class="kicker">What we do</p>
+				<h2 class="display-3">Boats moved, owners taught, watches stood.</h2>
+				<p class="lede">
+					The flagship is delivery. Everything else grew out of it — because the owner who
+					just bought the boat usually needs to learn her, and the insurer usually wants that
+					in writing.
+				</p>
+			</header>
+
+			<div class="grid grid-3 service-grid">
+				<article class="card service-card flagship">
+					<p class="card-kicker">The flagship</p>
+					<h3 class="card-title">Yacht delivery</h3>
+					<p class="card-body">
+						Repositioning sail and power yachts between ports over the water, using the
+						vessel’s own hull and propulsion — with or without owners aboard.
+					</p>
+					<a class="arrow-link" href="/yacht-delivery">
+						Yacht delivery <span class="arrow">→</span>
+					</a>
+				</article>
+
+				{
+					services.slice(0, 5).map((s) => (
+						<article class="card service-card">
+							<p class="card-kicker">{s.cardKicker}</p>
+							<h3 class="card-title">{s.name}</h3>
+							<p class="card-body">{s.cardBody}</p>
+							<a class="arrow-link" href={`/services/${s.slug}`}>
+								{s.name} <span class="arrow">→</span>
+							</a>
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<!-- ── how booking works ── -->
+	<section class="section band-surface">
+		<div class="container">
+			<header class="section-head">
+				<p class="kicker">How it works</p>
+				<h2 class="display-3">How a delivery gets booked</h2>
+				<p class="lede">Four steps, and no obligation until the deposit.</p>
+			</header>
+
+			<ol class="steps">
+				{
+					bookingSteps.map((s, i) => (
+						<li class="step">
+							<span class="step-num">{String(i + 1).padStart(2, '0')}</span>
+							<h3 class="step-title">{s.title}</h3>
+							<p class="step-body">{s.body}</p>
+						</li>
+					))
+				}
+			</ol>
+
+			<div class="steps-cta">
+				<a class="btn btn-primary btn-lg" href="/quote">Begin step one</a>
+			</div>
+		</div>
+	</section>
+
+	<!-- ── delivery vs transport vs shipping ── -->
+	<section class="section band-ink">
+		<div class="container">
+			<header class="section-head">
+				<p class="kicker">Know what you are buying</p>
+				<h2 class="display-3">Delivery, transport, shipping — three different things.</h2>
+				<p class="lede">
+					These get used interchangeably and they are not interchangeable. Only one of them
+					involves your boat running under her own power.
+				</p>
+			</header>
+
+			<div class="grid grid-3 trades">
+				{
+					threeTrades.map((t) => (
+						<article class:list={['card', 'trade', { 'trade-ours': t.ours }]}>
+							<p class="card-kicker">{t.label}</p>
+							<h3 class="card-title">{t.title}</h3>
+							<p class="card-body">{t.body}</p>
+						</article>
+					))
+				}
+			</div>
+			<p class="trades-foot">
+				<a class="arrow-link" href="/delivery-vs-transport">
+					The full comparison <span class="arrow">→</span>
+				</a>
+			</p>
+		</div>
+	</section>
+
+	<!-- ── who's on the helm ── -->
+	<section class="section">
+		<div class="container split split-reverse">
+			<Plate
+				src={imgCaptain}
+				alt="Captain James Lowe, white-bearded in sunglasses and a well-worn cap, smiling aboard a sailboat"
+				ratio="4/5"
+				sizes="(max-width: 860px) 100vw, 40vw"
+			/>
+			<div>
+				<p class="kicker">Who is on the helm</p>
+				<h2 class="display-3 no-optical">A licensed master, not a broker’s dispatch desk.</h2>
+				<div class="prose">
+					<p>
+						You talk to the captain who will be aboard. I plan the route, watch the weather,
+						commission the crew, and answer the phone when something needs deciding at two in
+						the morning off Cape Fear. Problems arise on deliveries — that is the job — and
+						they get solved rather than escalated.
+					</p>
+					<p>
+						Based in {site.baseLabel}, with intimate knowledge of Florida’s 1,300 miles of
+						coastline, every navigable inlet, the Keys, and the Okeechobee Waterway across
+						the peninsula.
+					</p>
+					<p set:html={inline(
+						'I have never **quit** a delivery. Yacht delivery sounds romantic; it is long demanding days, weather that does not cooperate, and boats that were never designed for comfort. I know what I am signing up for.',
+					)} />
+				</div>
+				<a class="arrow-link" href="/captain">Meet Capt. James <span class="arrow">→</span></a>
+			</div>
+		</div>
+	</section>
+
+	<!-- ── proof: the delivery log ── -->
+	<section class="section band-surface">
+		<div class="container">
+			<header class="section-head split-head">
+				<div>
+					<p class="kicker">The log</p>
+					<h2 class="display-3 no-optical">{deliveryCount} deliveries, and counting.</h2>
+				</div>
+				<p class="lede">
+					Sea Rays up the Mississippi, catamarans across the Straits, a 75-foot houseboat
+					taken out into the Gulf. The log is not exhaustive — it is what got photographed.
+				</p>
+			</header>
+
+			<div class="grid grid-4 log-grid">
+				{
+					featuredDeliveries.map((d) => (
+						<article class="log-item">
+							{d.image && (
+								<Plate
+									src={d.image}
+									alt={d.imageAlt ?? d.vessel}
+									ratio="4/3"
+									sizes="(max-width: 560px) 100vw, (max-width: 900px) 50vw, 25vw"
+								/>
+							)}
+							<h3 class="log-vessel">{d.vessel}</h3>
+							<p class="log-route">{d.route}</p>
+						</article>
+					))
+				}
+			</div>
+
+			<p class="log-foot">
+				<a class="arrow-link" href="/deliveries">
+					The full delivery log <span class="arrow">→</span>
+				</a>
+			</p>
+		</div>
+	</section>
+
+	<!-- ── waters of special expertise ── -->
+	<section class="section">
+		<div class="container">
+			<header class="section-head">
+				<p class="kicker">Waters we know by name</p>
+				<h2 class="display-3">Some passages need more than a chart.</h2>
+				<p class="lede">
+					Locks with their own hours, a lift bridge that decides whether your mast fits, a
+					current that turns a pleasant crossing into a bad one. These are the routes owners
+					ask about specifically.
+				</p>
+			</header>
+
+			<div class="grid grid-3 passage-grid">
+				{
+					passages.map((p) => (
+						<a class="passage-card" href={`/passages/${p.slug}`}>
+							<Plate
+								src={p.cardImage}
+								alt={p.cardImageAlt}
+								ratio="3/2"
+								sizes="(max-width: 560px) 100vw, (max-width: 900px) 50vw, 33vw"
+							/>
+							<h3 class="passage-title">{p.name}</h3>
+							<p class="passage-body">{p.summary}</p>
+						</a>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<!-- ── service area teaser ── -->
+	<section class="section band-surface">
+		<div class="container split">
+			<div>
+				<p class="kicker">Where we go</p>
+				<h2 class="display-3 no-optical">
+					{areaCount} regions, from Maine to the Rio Grande and out to the islands.
+				</h2>
+				<div class="prose">
+					<p>
+						The Atlantic seaboard, the Gulf, every navigable inland river from Minnesota to
+						the Gulf of Mexico, the Great Lakes, the Bahamas, the Caribbean and Canada. A
+						large share of our clients are new buyers moving a freshly purchased vessel to
+						her home port — often from a state they have never boated in.
+					</p>
+					<p>
+						Ninety percent of all vessel relocations start in Florida, end in Florida, or
+						pass through it.
+					</p>
+				</div>
+				<a class="arrow-link" href="/service-area">
+					Every state and waterway <span class="arrow">→</span>
+				</a>
+			</div>
+			<Plate
+				src={imgHelmView}
+				alt="The view forward from a flybridge helm offshore, compass in the foreground and open water ahead"
+				ratio="4/3"
+				sizes="(max-width: 860px) 100vw, 45vw"
+			/>
+		</div>
+	</section>
+
+	<FinalCta
+		kicker="Start here"
+		heading="Tell me about the boat and the route."
+		body="Every estimate starts with the delivery form. It takes about five minutes, and the more accurate your vessel’s speed and specs, the closer the estimate lands."
+		image={imgChartPlot}
+		imageAlt="A Mercator nautical chart with a course plotted in red"
+	/>
+</Layout>
+
+<style>
+	.section-head {
+		max-width: 62ch;
+		margin-bottom: clamp(30px, 4vw, 52px);
+	}
+	.split-head {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+		gap: clamp(24px, 4vw, 64px);
+		align-items: end;
+		max-width: none;
+	}
+	.split-head .lede {
+		margin-bottom: 0;
+	}
+	@media (max-width: 760px) {
+		.split-head {
+			grid-template-columns: minmax(0, 1fr);
+			align-items: start;
+		}
+	}
+
+	/* — services — */
+	.service-card {
+		padding: clamp(20px, 2.4vw, 30px);
+	}
+	.service-card .card-title {
+		font-size: clamp(20px, 2vw, 26px);
+		font-weight: 400;
+		margin-bottom: var(--space-1);
+	}
+	.service-card .card-body {
+		font-size: 14px;
+		line-height: 1.62;
+		margin-bottom: var(--space-3);
+	}
+	.flagship {
+		border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+	}
+
+	/* — steps — */
+	.steps {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: clamp(20px, 3vw, 40px);
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		counter-reset: step;
+	}
+	.step {
+		padding-top: var(--space-4);
+		border-top: 1px solid var(--color-divider);
+	}
+	.step-title {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: clamp(17px, 1.6vw, 20px);
+		line-height: 1.25;
+		margin: 0 0 var(--space-2);
+	}
+	.step-body {
+		margin: 0;
+		font-size: 13.5px;
+		line-height: 1.65;
+		color: color-mix(in srgb, var(--color-text) 78%, transparent);
+	}
+	.steps-cta {
+		margin-top: clamp(28px, 3.5vw, 46px);
+	}
+	@media (max-width: 900px) {
+		.steps {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+	@media (max-width: 520px) {
+		.steps {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	/* — three trades — */
+	.trade {
+		padding: clamp(20px, 2.4vw, 30px);
+	}
+	.trade .card-title {
+		font-size: clamp(21px, 2vw, 27px);
+		font-weight: 400;
+	}
+	.trade .card-body {
+		font-size: 14px;
+		line-height: 1.62;
+	}
+	.trade-ours {
+		border-color: var(--color-accent);
+	}
+	.trade-ours .card-kicker {
+		color: var(--color-accent);
+	}
+	.trades-foot {
+		margin: clamp(24px, 3vw, 38px) 0 0;
+	}
+
+	/* — delivery log — */
+	.log-vessel {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: 17px;
+		line-height: 1.25;
+		margin: var(--space-3) 0 2px;
+	}
+	.log-route {
+		margin: 0;
+		font-size: 12.5px;
+		line-height: 1.5;
+		color: color-mix(in srgb, var(--color-text) 62%, transparent);
+	}
+	.log-foot {
+		margin: clamp(26px, 3vw, 40px) 0 0;
+	}
+
+	/* — passages — */
+	.passage-card {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+	}
+	.passage-title {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: clamp(19px, 1.8vw, 23px);
+		line-height: 1.22;
+		margin: var(--space-3) 0 var(--space-1);
+	}
+	.passage-card:hover .passage-title {
+		color: var(--color-accent);
+	}
+	.passage-body {
+		margin: 0;
+		font-size: 13.5px;
+		line-height: 1.62;
+		color: color-mix(in srgb, var(--color-text) 76%, transparent);
+	}
+</style>

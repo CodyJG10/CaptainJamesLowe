@@ -1,0 +1,79 @@
+---
+/**
+ * The image wrapper. Every content photograph on the site goes through it.
+ *
+ * `.plate` is the design system's signature: a thin surface-colored mat with a
+ * hairline outline and a warm archival grade, so photographs read as plates
+ * tipped into a book rather than banners pasted onto a page.
+ *
+ * Uses astro:assets, so each photo ships as a responsive srcset in a modern
+ * format with intrinsic width/height baked in — no layout shift.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+	src: ImageMetadata;
+	alt: string;
+	/** Crop to a ratio, e.g. '4/3', '16/9', '1/1'. Omit to keep the original. */
+	ratio?: string;
+	/** Rendered width hint for srcset selection. Default suits a half-column. */
+	sizes?: string;
+	/** Only the LCP image should be eager. Everything else lazy-loads. */
+	eager?: boolean;
+	/** Optional caption, set in the system's figcaption style. */
+	caption?: string;
+	class?: string;
+}
+
+const {
+	src,
+	alt,
+	ratio,
+	sizes = '(max-width: 860px) 100vw, 50vw',
+	eager = false,
+	caption,
+	class: className,
+} = Astro.props;
+
+/**
+ * Never request more pixels than the source has. Several of the captain's own
+ * photographs are 400px thumbnails — the only versions that were ever
+ * published — and asking Astro to emit 1600px variants of those would upscale
+ * a thumbnail and make it look worse, not better.
+ */
+const candidateWidths = [400, 640, 900, 1200, 1600];
+const widths = candidateWidths.filter((w) => w <= src.width);
+if (widths.length === 0) widths.push(src.width);
+---
+
+<figure class:list={['plate-figure', className]}>
+	<div class="plate" style={ratio ? `aspect-ratio:${ratio}` : undefined}>
+		<Image
+			src={src}
+			alt={alt}
+			widths={widths}
+			sizes={sizes}
+			loading={eager ? 'eager' : 'lazy'}
+			fetchpriority={eager ? 'high' : undefined}
+			decoding={eager ? 'sync' : 'async'}
+		/>
+	</div>
+	{caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+	.plate-figure {
+		margin: 0;
+	}
+	.plate {
+		overflow: hidden;
+		border-radius: var(--radius-sm);
+	}
+	.plate :global(img) {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+</style>

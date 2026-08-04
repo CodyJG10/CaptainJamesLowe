@@ -1,0 +1,74 @@
+---
+/**
+ * The closing call to action. Every page ends with one.
+ *
+ * Dark band with a matted photograph — the same colophon treatment as the
+ * footer, so the two read as one closing movement rather than two competing
+ * blocks stacked on each other.
+ */
+import type { ImageMetadata } from 'astro';
+import Plate from './Plate.astro';
+import { site } from '../data/site';
+
+interface Props {
+	kicker: string;
+	heading: string;
+	body: string;
+	image: ImageMetadata;
+	imageAlt: string;
+	primaryLabel?: string;
+	primaryHref?: string;
+}
+
+const {
+	kicker,
+	heading,
+	body,
+	image,
+	imageAlt,
+	primaryLabel = 'Open the delivery form',
+	primaryHref = '/quote',
+} = Astro.props;
+---
+
+<section class="final band-ink">
+	<div class="container split">
+		<div class="final-copy">
+			<p class="kicker">{kicker}</p>
+			<h2 class="display-2 no-optical">{heading}</h2>
+			<p class="lede">{body}</p>
+			<div class="final-actions">
+				<a class="btn btn-primary btn-lg" href={primaryHref}>{primaryLabel}</a>
+				<a class="btn btn-secondary btn-lg" href={site.phoneHref}>{site.phoneDisplay}</a>
+			</div>
+			<p class="final-note">
+				We do not share, rent or sell your information. Data is collected only to produce the
+				estimate you asked for.
+			</p>
+		</div>
+
+		<Plate src={image} alt={imageAlt} ratio="4/5" sizes="(max-width: 860px) 100vw, 40vw" />
+	</div>
+</section>
+
+<style>
+	.final {
+		padding-block: clamp(52px, 7vw, 100px);
+	}
+	.final-copy .lede {
+		max-width: 52ch;
+	}
+	.final-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-3);
+		margin-top: clamp(24px, 3vw, 34px);
+	}
+	.final-note {
+		margin: var(--space-6) 0 0;
+		font-size: 12px;
+		line-height: 1.6;
+		max-width: 48ch;
+		color: color-mix(in srgb, var(--color-text) 58%, transparent);
+	}
+</style>

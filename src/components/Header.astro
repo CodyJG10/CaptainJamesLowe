@@ -1,0 +1,306 @@
+---
+/**
+ * Site header.
+ *
+ * Two states. Normally it sits on the page ground with a hairline beneath it.
+ * With `transparent` (the homepage, over the video hero) it becomes an overlay
+ * in paper-on-ink: same layout, inverted palette, no bottom rule — the hero's
+ * own edge does that job.
+ *
+ * The mobile panel is a hidden checkbox driving a sibling selector, so the nav
+ * opens and closes with zero JavaScript. One small inline script closes it on
+ * Escape and on navigation, which CSS alone cannot do.
+ */
+import { Image } from 'astro:assets';
+import { site, nav } from '../data/site';
+import logo from '../assets/cjl/site/logo-transparent.png';
+
+interface Props {
+	transparent?: boolean;
+}
+const { transparent = false } = Astro.props;
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
+---
+
+<header class:list={['site-header', { transparent }]}>
+	<div class="utility">
+		<div class="container utility-inner">
+			<span class="utility-license">{site.license}</span>
+			<a class="utility-phone" href={site.phoneHref}>{site.phoneDisplay}</a>
+		</div>
+	</div>
+
+	<div class="container bar">
+		<a class="brand" href="/">
+			<Image class="brand-mark" src={logo} alt="" width={48} height={42} loading="eager" />
+			<span class="brand-text">
+				<span class="brand-name">Captain James Lowe</span>
+				<span class="brand-sub">Yacht Delivery</span>
+			</span>
+		</a>
+
+		<input type="checkbox" id="nav-toggle" class="nav-toggle sr-only" />
+		<label class="nav-burger" for="nav-toggle" aria-label="Menu">
+			<span></span><span></span><span></span>
+		</label>
+
+		<nav class="nav-panel" aria-label="Primary">
+			<ul class="nav-list">
+				{
+					nav.map((item) => (
+						<li>
+							<a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+								{item.label}
+							</a>
+						</li>
+					))
+				}
+			</ul>
+			<div class="nav-actions">
+				<a class="btn btn-primary" href="/quote">Get a delivery quote</a>
+				<a class="nav-phone" href={site.phoneHref}>{site.phoneDisplay}</a>
+			</div>
+		</nav>
+	</div>
+</header>
+
+<script is:inline>
+	(() => {
+		const toggle = document.getElementById('nav-toggle');
+		if (!toggle) return;
+		const close = () => (toggle.checked = false);
+		document.addEventListener('keydown', (e) => e.key === 'Escape' && close());
+		document.querySelectorAll('.nav-panel a').forEach((a) => a.addEventListener('click', close));
+	})();
+</script>
+
+<style>
+	.site-header {
+		position: relative;
+		z-index: 20;
+		background: var(--color-bg);
+		border-bottom: 1px solid var(--color-divider);
+	}
+
+	/* Overlay state — the hero scrolls beneath it. */
+	.site-header.transparent {
+		position: absolute;
+		inset: 0 0 auto;
+		background: transparent;
+		border-bottom-color: transparent;
+		--color-text: #f3f2f2;
+		--color-divider: color-mix(in srgb, #f3f2f2 22%, transparent);
+		--color-accent: var(--color-accent-300);
+		color: #f3f2f2;
+	}
+
+	/* — utility strip — */
+	.utility {
+		border-bottom: 1px solid var(--color-divider);
+		font-size: 11px;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+	.utility-inner {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-4);
+		padding-block: 7px;
+	}
+	.utility-license {
+		font-family: var(--font-heading);
+		color: color-mix(in srgb, var(--color-text) 62%, transparent);
+	}
+	.utility-phone {
+		font-family: var(--font-heading);
+		color: var(--color-accent);
+		text-decoration: none;
+		font-variant-numeric: tabular-nums;
+	}
+	.utility-phone:hover {
+		text-decoration: underline;
+	}
+
+	/* — main bar — */
+	.bar {
+		display: flex;
+		align-items: center;
+		gap: var(--space-6);
+		padding-block: var(--space-3);
+	}
+
+	.brand {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		text-decoration: none;
+		color: inherit;
+		margin-right: auto;
+	}
+	.brand-mark {
+		width: 48px;
+		height: auto;
+		flex: none;
+	}
+	/* The mark is black line art, so it inverts cleanly for the overlay state. */
+	.transparent .brand-mark {
+		filter: invert(1);
+	}
+	.brand-text {
+		display: flex;
+		flex-direction: column;
+		line-height: 1.1;
+	}
+	.brand-name {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: clamp(17px, 1.8vw, 21px);
+		letter-spacing: -0.01em;
+	}
+	.brand-sub {
+		font-family: var(--font-heading);
+		font-size: 11px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--color-accent);
+		margin-top: 3px;
+	}
+
+	.nav-panel {
+		display: flex;
+		align-items: center;
+		gap: var(--space-6);
+	}
+	.nav-list {
+		display: flex;
+		align-items: center;
+		gap: var(--space-4);
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.nav-list a {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: 14px;
+		color: inherit;
+		text-decoration: none;
+		padding-bottom: 2px;
+		border-bottom: 1px solid transparent;
+		white-space: nowrap;
+	}
+	.nav-list a:hover {
+		color: var(--color-accent);
+	}
+	.nav-list a[aria-current='page'] {
+		color: var(--color-accent);
+		border-bottom-color: var(--color-accent);
+	}
+
+	.nav-actions {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+	}
+	.nav-phone {
+		display: none;
+	}
+
+	/* — burger, hidden until the nav no longer fits — */
+	.nav-burger {
+		display: none;
+		flex-direction: column;
+		justify-content: center;
+		gap: 5px;
+		width: 40px;
+		height: 40px;
+		padding: 9px 7px;
+		cursor: pointer;
+		border: 1px solid var(--color-divider);
+		border-radius: var(--radius-md);
+	}
+	.nav-burger span {
+		display: block;
+		height: 1px;
+		background: var(--color-text);
+		transition: transform 0.2s ease, opacity 0.2s ease;
+	}
+	.nav-toggle:focus-visible + .nav-burger {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 2px;
+	}
+
+	@media (max-width: 1080px) {
+		.nav-burger {
+			display: flex;
+		}
+		.nav-panel {
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: 100%;
+			flex-direction: column;
+			align-items: stretch;
+			gap: 0;
+			padding: var(--space-4) var(--gutter) var(--space-6);
+			background: var(--color-bg);
+			border-bottom: 1px solid var(--color-divider);
+			box-shadow: var(--shadow-md);
+			/* Collapsed by default; the checkbox reveals it. */
+			display: none;
+		}
+		/* The panel drops onto the page ground even in overlay state, so it
+		   needs the light palette back or the links vanish. */
+		.transparent .nav-panel {
+			background: var(--color-bg);
+			color: var(--color-text);
+			--color-text: #201f1d;
+			--color-divider: color-mix(in srgb, #201f1d 16%, transparent);
+			--color-accent: #b68235;
+		}
+		.nav-toggle:checked ~ .nav-panel {
+			display: flex;
+		}
+		.nav-list {
+			flex-direction: column;
+			align-items: stretch;
+			gap: 0;
+		}
+		.nav-list li + li {
+			border-top: 1px solid var(--color-divider);
+		}
+		.nav-list a {
+			display: block;
+			padding: var(--space-3) 0;
+			font-size: 17px;
+			border-bottom: 0;
+		}
+		.nav-actions {
+			flex-direction: column;
+			align-items: stretch;
+			gap: var(--space-3);
+			margin-top: var(--space-4);
+		}
+		.nav-phone {
+			display: block;
+			text-align: center;
+			font-family: var(--font-heading);
+			font-size: 15px;
+			color: var(--color-accent);
+			text-decoration: none;
+			font-variant-numeric: tabular-nums;
+		}
+	}
+
+	@media (max-width: 560px) {
+		.utility-license {
+			font-size: 10px;
+		}
+		.brand-mark {
+			width: 40px;
+		}
+	}
+</style>

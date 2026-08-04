@@ -1,0 +1,233 @@
+---
+/**
+ * Site footer — the colophon page.
+ *
+ * The old site ended every one of its 40 pages with a 28-block directory of
+ * states and waterways: several thousand words of keyword text, identical
+ * sitewide. That is textbook duplicate content and it was suppressing the very
+ * pages it was meant to lift. It now lives once, as real content, at
+ * /service-area — and the footer just points there.
+ */
+import { Image } from 'astro:assets';
+import { site, nav } from '../data/site';
+import { services } from '../data/services';
+import logo from '../assets/cjl/site/logo-transparent.png';
+
+const year = new Date().getFullYear();
+
+const social = [
+	['Facebook', site.socials.facebook],
+	['Instagram', site.socials.instagram],
+	['TikTok', site.socials.tiktok],
+	['LinkedIn', site.socials.linkedin],
+] as const;
+---
+
+<footer class="site-footer band-ink">
+	<div class="container">
+		<div class="top">
+			<div class="identity">
+				<Image class="mark" src={logo} alt="" width={92} height={80} loading="lazy" />
+				<p class="name">Captain James Lowe</p>
+				<p class="license">{site.license}</p>
+				<a class="phone" href={site.phoneHref}>{site.phoneDisplay}</a>
+				{site.email && <a class="email" href={`mailto:${site.email}`}>{site.email}</a>}
+				<p class="blurb">
+					Yacht delivery, relief captain work and hands-on training. Based in {
+						site.baseLabel
+					}; working the Atlantic and Gulf coasts, the Intracoastal, the inland rivers, the
+					Great Loop, Florida, the Bahamas and the Caribbean.
+				</p>
+			</div>
+
+			<nav class="col" aria-label="Site">
+				<h2 class="col-head">Site</h2>
+				<ul>
+					{nav.map((i) => <li><a href={i.href}>{i.label}</a></li>)}
+					<li><a href="/delivery-vs-transport">Delivery vs transport</a></li>
+				</ul>
+			</nav>
+
+			<nav class="col" aria-label="Services">
+				<h2 class="col-head">Services</h2>
+				<ul>
+					{services.map((s) => <li><a href={`/services/${s.slug}`}>{s.name}</a></li>)}
+				</ul>
+			</nav>
+
+			<div class="col cta-col">
+				<h2 class="col-head">All estimates start here</h2>
+				<a class="btn btn-primary btn-block" href="/quote">The delivery form</a>
+				<p class="note">
+					Delivery, not transport or shipping: your boat moves over the water under its own
+					power, crewed by a licensed captain.
+				</p>
+				<h2 class="col-head social-head">Follow along</h2>
+				<ul class="social">
+					{social.map(([label, href]) => <li><a href={href} rel="me noopener" target="_blank">{label}</a></li>)}
+				</ul>
+			</div>
+		</div>
+
+		<div class="bottom">
+			<p class="copy">© 2015–{year} Captain James Lowe. All rights reserved.</p>
+			<ul class="legal">
+				<li><a href="/payments">Payments</a></li>
+				<li><a href="/privacy">Privacy</a></li>
+				<li><a href="/disclaimer">Disclaimer</a></li>
+				<li><a href="/service-area">Service area</a></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+
+<style>
+	.site-footer {
+		padding-block: clamp(44px, 5vw, 76px) var(--space-6);
+		margin-top: auto;
+	}
+
+	.top {
+		display: grid;
+		grid-template-columns: minmax(0, 1.6fr) repeat(2, minmax(0, 1fr)) minmax(0, 1.2fr);
+		gap: clamp(28px, 4vw, 56px);
+		padding-bottom: clamp(32px, 4vw, 52px);
+	}
+
+	.mark {
+		width: 92px;
+		height: auto;
+		filter: invert(1);
+		opacity: 0.85;
+		margin-bottom: var(--space-4);
+	}
+	.name {
+		font-family: var(--font-heading);
+		font-size: 24px;
+		line-height: 1.15;
+		margin: 0 0 2px;
+	}
+	.license {
+		font-family: var(--font-heading);
+		font-size: 11px;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--color-accent);
+		margin: 0 0 var(--space-3);
+	}
+	.phone,
+	.email {
+		display: block;
+		font-family: var(--font-heading);
+		font-size: 19px;
+		color: inherit;
+		text-decoration: none;
+		font-variant-numeric: tabular-nums;
+	}
+	.phone:hover,
+	.email:hover {
+		color: var(--color-accent);
+	}
+	.email {
+		font-size: 15px;
+	}
+	.blurb {
+		margin: var(--space-4) 0 0;
+		font-size: 13px;
+		line-height: 1.65;
+		max-width: 44ch;
+		color: color-mix(in srgb, var(--color-text) 72%, transparent);
+	}
+
+	.col-head {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: 11px;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--color-accent);
+		margin: 0 0 var(--space-4);
+		padding-bottom: var(--space-2);
+		border-bottom: 1px solid var(--color-divider);
+	}
+	.col ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.col li + li {
+		margin-top: var(--space-2);
+	}
+	.col a {
+		font-size: 13.5px;
+		color: inherit;
+		text-decoration: none;
+	}
+	.col a:hover {
+		color: var(--color-accent);
+		text-decoration: underline;
+	}
+
+	.cta-col .note {
+		margin: var(--space-3) 0 0;
+		font-size: 12px;
+		line-height: 1.6;
+		color: color-mix(in srgb, var(--color-text) 65%, transparent);
+	}
+	.social-head {
+		margin-top: var(--space-6);
+	}
+	.social {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2) var(--space-4);
+	}
+	.social li + li {
+		margin-top: 0;
+	}
+
+	.bottom {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-3) var(--space-6);
+		padding-top: var(--space-4);
+		border-top: 1px solid var(--color-divider);
+	}
+	.copy {
+		margin: 0;
+		font-size: 12px;
+		color: color-mix(in srgb, var(--color-text) 60%, transparent);
+	}
+	.legal {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-4);
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.legal a {
+		font-size: 12px;
+		color: color-mix(in srgb, var(--color-text) 72%, transparent);
+		text-decoration: none;
+	}
+	.legal a:hover {
+		color: var(--color-accent);
+	}
+
+	@media (max-width: 900px) {
+		.top {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+		.identity {
+			grid-column: 1 / -1;
+		}
+	}
+	@media (max-width: 560px) {
+		.top {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+</style>

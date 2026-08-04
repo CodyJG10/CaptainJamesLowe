@@ -650,6 +650,9 @@ select.input {
 	line-height: 1.62;
 	color: color-mix(in srgb, var(--color-text) 82%, transparent);
 	max-width: 62ch;
+	/* Display headings carry no bottom margin so their optical alignment stays
+	   under our control — the gap belongs to whatever follows them. */
+	margin-top: var(--space-4);
 }
 
 /* Justified editorial body at a comfortable measure — the system's signature.

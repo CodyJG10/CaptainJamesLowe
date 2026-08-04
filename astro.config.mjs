@@ -8,4 +8,7 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
 	site: 'https://www.captainjameslowe.com',
 	integrations: [sitemap()],
+	// The floating dev toolbar sits over the page and lands in the middle of
+	// every screenshot taken during review. Nothing here needs it.
+	devToolbar: { enabled: false },
 });
