@@ -1,0 +1,326 @@
+---
+/**
+ * Passage pages — one template, six waters.
+ *
+ * These carry the operational detail that makes the site worth finding: lock
+ * phone numbers, bridge clearances, cruising permit fees, offshore distances.
+ * The facts panel and the warning callout exist because that content deserves
+ * to be scannable rather than buried in a paragraph.
+ */
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/PageHero.astro';
+import FinalCta from '../../components/FinalCta.astro';
+import Plate from '../../components/Plate.astro';
+import { passages, type Passage } from '../../data/passages';
+import { site } from '../../data/site';
+import { inline } from '../../lib/inline';
+
+export function getStaticPaths() {
+	return passages.map((p) => ({ params: { slug: p.slug }, props: { passage: p } }));
+}
+
+interface Props {
+	passage: Passage;
+}
+const { passage } = Astro.props;
+
+const others = passages.filter((p) => p.slug !== passage.slug).slice(0, 3);
+
+const breadcrumbs = {
+	'@type': 'BreadcrumbList',
+	itemListElement: [
+		{ '@type': 'ListItem', position: 1, name: 'Home', item: site.url },
+		{ '@type': 'ListItem', position: 2, name: 'Yacht delivery', item: `${site.url}/yacht-delivery` },
+		{
+			'@type': 'ListItem',
+			position: 3,
+			name: passage.name,
+			item: `${site.url}/passages/${passage.slug}`,
+		},
+	],
+};
+---
+
+<Layout
+	title={passage.metaTitle}
+	description={passage.metaDescription}
+	jsonLd={[breadcrumbs]}
+>
+	<PageHero
+		kicker={passage.hero.kicker}
+		heading={passage.hero.heading}
+		lede={passage.hero.lede}
+		image={passage.hero.image}
+		imageAlt={passage.hero.imageAlt}
+		back={{ label: 'Yacht delivery', href: '/yacht-delivery' }}
+	/>
+
+	<section class="section">
+		<div class="container article">
+			<div class="prose">
+				{passage.body.map((p) => <p set:html={inline(p)} />)}
+			</div>
+
+			{
+				passage.facts && (
+					<aside class="facts">
+						<h2 class="facts-head">{passage.facts.heading}</h2>
+						<dl class="facts-list">
+							{passage.facts.rows.map((r) => (
+								<div class="facts-row">
+									<dt>{r.label}</dt>
+									<dd class="tnum">{r.value}</dd>
+								</div>
+							))}
+						</dl>
+						{passage.facts.note && <p class="facts-note">{passage.facts.note}</p>}
+					</aside>
+				)
+			}
+		</div>
+	</section>
+
+	{
+		passage.figure && (
+			<section class="section-tight">
+				<div class="container figure-wrap">
+					<Plate
+						src={passage.figure.image}
+						alt={passage.figure.alt}
+						caption={passage.figure.caption}
+						ratio="16/9"
+						sizes="(max-width: 860px) 100vw, 70vw"
+					/>
+				</div>
+			</section>
+		)
+	}
+
+	{
+		passage.detail && (
+			<section class="section band-surface">
+				<div class="container">
+					<header class="section-head">
+						<p class="kicker">{passage.detail.kicker}</p>
+						<h2 class="display-3">{passage.detail.heading}</h2>
+						{passage.detail.intro && <p class="lede">{passage.detail.intro}</p>}
+					</header>
+					<div class="detail-list">
+						{passage.detail.items.map((item) => (
+							<article class="detail-item">
+								<h3 class="detail-title">{item.title}</h3>
+								<p class="detail-body">{item.body}</p>
+							</article>
+						))}
+					</div>
+				</div>
+			</section>
+		)
+	}
+
+	{
+		passage.warning && (
+			<section class="section-tight">
+				<div class="container">
+					<aside class="warning" role="note">
+						<p class="warning-flag">Safety</p>
+						<h2 class="warning-head">{passage.warning.heading}</h2>
+						<p class="warning-body">{passage.warning.body}</p>
+					</aside>
+				</div>
+			</section>
+		)
+	}
+
+	<section class="section section-ruled">
+		<div class="container">
+			<p class="kicker">Other waters</p>
+			<div class="grid grid-3 others">
+				{
+					others.map((p) => (
+						<a class="other-card" href={`/passages/${p.slug}`}>
+							<Plate
+								src={p.cardImage}
+								alt={p.cardImageAlt}
+								ratio="3/2"
+								sizes="(max-width: 560px) 100vw, 33vw"
+							/>
+							<h3 class="other-title">{p.name}</h3>
+							<p class="other-body">{p.summary}</p>
+						</a>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<FinalCta
+		kicker="Start here"
+		heading={`Moving a boat through ${passage.name}?`}
+		body="Send the vessel details and the route. The estimate comes back with the passage already charted."
+		image={passage.cardImage}
+		imageAlt={passage.cardImageAlt}
+	/>
+</Layout>
+
+<style>
+	.section-head {
+		max-width: 62ch;
+		margin-bottom: clamp(30px, 4vw, 52px);
+	}
+
+	.article {
+		display: grid;
+		grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+		gap: clamp(30px, 5vw, 76px);
+		align-items: start;
+	}
+	@media (max-width: 900px) {
+		.article {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	/* — facts panel — */
+	.facts {
+		border: 1px solid var(--color-divider);
+		border-radius: var(--radius-md);
+		padding: clamp(20px, 2.4vw, 28px);
+	}
+	.facts-head {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: 11px;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--color-accent);
+		margin: 0 0 var(--space-4);
+		padding-bottom: var(--space-2);
+		border-bottom: 1px solid var(--color-divider);
+	}
+	.facts-list {
+		margin: 0;
+	}
+	.facts-row {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: var(--space-1) var(--space-4);
+		padding-block: var(--space-3);
+		border-bottom: 1px solid var(--color-divider);
+	}
+	.facts-row:last-child {
+		border-bottom: 0;
+		padding-bottom: 0;
+	}
+	.facts-row dt {
+		font-size: 13px;
+		line-height: 1.5;
+		color: color-mix(in srgb, var(--color-text) 74%, transparent);
+		flex: 1 1 55%;
+	}
+	.facts-row dd {
+		margin: 0;
+		font-family: var(--font-heading);
+		font-size: 14px;
+		text-align: right;
+		flex: 0 1 auto;
+	}
+	.facts-note {
+		margin: var(--space-4) 0 0;
+		padding-top: var(--space-3);
+		border-top: 1px solid var(--color-divider);
+		font-size: 11.5px;
+		line-height: 1.6;
+		color: color-mix(in srgb, var(--color-text) 58%, transparent);
+	}
+
+	.figure-wrap {
+		max-width: 980px;
+	}
+
+	/* — detail list — */
+	.detail-list {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0 clamp(28px, 5vw, 72px);
+	}
+	.detail-item {
+		padding-block: clamp(18px, 2.2vw, 26px);
+		border-top: 1px solid var(--color-divider);
+	}
+	.detail-title {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: clamp(17px, 1.6vw, 20px);
+		line-height: 1.25;
+		margin: 0 0 var(--space-2);
+	}
+	.detail-body {
+		margin: 0;
+		font-size: 13.5px;
+		line-height: 1.68;
+		color: color-mix(in srgb, var(--color-text) 78%, transparent);
+	}
+	@media (max-width: 760px) {
+		.detail-list {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	/* — safety callout — */
+	.warning {
+		border: 1px solid var(--color-accent);
+		border-left-width: 3px;
+		border-radius: var(--radius-md);
+		padding: clamp(22px, 2.8vw, 34px);
+		max-width: 78ch;
+		background: color-mix(in srgb, var(--color-accent-100) 45%, transparent);
+	}
+	.warning-flag {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: 10px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--color-accent-700);
+		margin: 0 0 var(--space-2);
+	}
+	.warning-head {
+		font-family: var(--font-heading);
+		font-weight: 400;
+		font-size: clamp(21px, 2.2vw, 28px);
+		line-height: 1.2;
+		margin: 0 0 var(--space-3);
+	}
+	.warning-body {
+		margin: 0;
+		font-size: 15px;
+		line-height: 1.68;
+	}
+
+	/* — other waters — */
+	.others {
+		margin-top: clamp(22px, 3vw, 34px);
+	}
+	.other-card {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+	}
+	.other-title {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: clamp(18px, 1.7vw, 22px);
+		margin: var(--space-3) 0 var(--space-1);
+	}
+	.other-card:hover .other-title {
+		color: var(--color-accent);
+	}
+	.other-body {
+		margin: 0;
+		font-size: 13.5px;
+		line-height: 1.62;
+		color: color-mix(in srgb, var(--color-text) 76%, transparent);
+	}
+</style>

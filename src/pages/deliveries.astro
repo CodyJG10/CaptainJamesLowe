@@ -1,0 +1,199 @@
+---
+/**
+ * The delivery log.
+ *
+ * Grid sizing note: every photograph here is a 400px thumbnail — the only size
+ * the old site ever published. Rather than blow them up and make them look
+ * cheap, the grid is built to a card width they can actually fill, and the
+ * cards carry their weight through type and rules instead of scale.
+ */
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+import FinalCta from '../components/FinalCta.astro';
+import Plate from '../components/Plate.astro';
+import { deliveries, deliveryCount } from '../data/deliveries';
+import { site } from '../data/site';
+import imgSunset from '../assets/cjl/site/sunset-georgetown.jpg';
+import imgMotorYachtHaze from '../assets/cjl/stock/motor-yacht-underway-haze.jpg';
+
+const kindLabel = {
+	delivery: 'Delivery',
+	'sea-trial': 'Sea trial',
+	'captain-for-hire': 'Captain for hire',
+} as const;
+
+const counts = {
+	delivery: deliveries.filter((d) => d.kind === 'delivery').length,
+	trial: deliveries.filter((d) => d.kind === 'sea-trial').length,
+	hire: deliveries.filter((d) => d.kind === 'captain-for-hire').length,
+};
+
+const itemList = {
+	'@type': 'ItemList',
+	name: 'Completed yacht deliveries',
+	numberOfItems: deliveryCount,
+	itemListElement: deliveries.map((d, i) => ({
+		'@type': 'ListItem',
+		position: i + 1,
+		name: `${d.vessel} — ${d.route}`,
+	})),
+};
+
+const title = 'Delivery Log | Completed Yacht Deliveries by Captain James Lowe';
+const description = `${deliveryCount} documented vessel relocations — Sea Rays up the Mississippi, catamarans across the Florida Straits, trawlers down the ICW. Real boats, real routes.`;
+---
+
+<Layout {title} {description} jsonLd={[itemList]}>
+	<PageHero
+		kicker="The log"
+		heading={`${deliveryCount} boats, and where they went.`}
+		lede="Not an exhaustive list — it is what got photographed, and it is not in chronological order. Sea trials and single-day captain jobs are limited to central and south Florida; everything else travelled."
+		image={imgMotorYachtHaze}
+		imageAlt="A flybridge motor yacht underway in warm haze, with a ship on the horizon"
+	/>
+
+	<section class="section-tight band-surface">
+		<div class="container">
+			<div class="stat-row">
+				<div class="stat">
+					<span class="stat-value">{counts.delivery}</span>
+					<span class="stat-label">Deliveries</span>
+				</div>
+				<div class="stat">
+					<span class="stat-value">{counts.trial}</span>
+					<span class="stat-label">Sea trials</span>
+				</div>
+				<div class="stat">
+					<span class="stat-value">{counts.hire}</span>
+					<span class="stat-label">Captain for hire</span>
+				</div>
+				<div class="stat">
+					<span class="stat-value">14</span>
+					<span class="stat-label">States and countries</span>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<ul class="log">
+				{
+					deliveries.map((d) => (
+						<li class="entry">
+							{d.image ? (
+								<Plate
+									src={d.image}
+									alt={d.imageAlt ?? d.vessel}
+									ratio="4/3"
+									sizes="(max-width: 560px) 100vw, (max-width: 900px) 45vw, 300px"
+								/>
+							) : (
+								<div class="no-photo" aria-hidden="true">
+									<span>No photograph</span>
+								</div>
+							)}
+							<div class="entry-body">
+								<p class="entry-kind">{kindLabel[d.kind]}</p>
+								<h2 class="entry-vessel">{d.vessel}</h2>
+								<p class="entry-route">{d.route}</p>
+								<p class="entry-note">{d.note}</p>
+							</div>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+	</section>
+
+	<section class="section-tight">
+		<div class="container">
+			<p class="disclaimer">
+				Photographs are the captain’s own, taken on the job. They are published at the
+				resolution they were shot and stored at.
+			</p>
+		</div>
+	</section>
+
+	<FinalCta
+		kicker="Start here"
+		heading="Add your boat to the log."
+		body={`Send the vessel and the route through the delivery form. Or call ${site.phoneDisplay} and describe it.`}
+		image={imgSunset}
+		imageAlt="Sunset over a marina seen from a boat’s deck, with a piling and dock in view"
+	/>
+</Layout>
+
+<style>
+	.log {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+		gap: clamp(26px, 3.2vw, 44px);
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.entry {
+		display: flex;
+		flex-direction: column;
+	}
+	.entry-body {
+		padding-top: var(--space-3);
+	}
+	.entry-kind {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: 10px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--color-accent);
+		margin: 0 0 var(--space-2);
+	}
+	.entry-vessel {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: clamp(18px, 1.7vw, 21px);
+		line-height: 1.22;
+		margin: 0 0 2px;
+	}
+	.entry-route {
+		margin: 0 0 var(--space-2);
+		font-size: 13px;
+		line-height: 1.45;
+		color: var(--color-accent-700);
+	}
+	.entry-note {
+		margin: 0;
+		padding-top: var(--space-2);
+		border-top: 1px solid var(--color-divider);
+		font-size: 13px;
+		line-height: 1.62;
+		color: color-mix(in srgb, var(--color-text) 74%, transparent);
+	}
+
+	/* One entry has no photograph — hold the shape rather than reflow the grid. */
+	.no-photo {
+		display: grid;
+		place-items: center;
+		aspect-ratio: 4 / 3;
+		border: 1px dashed var(--color-divider);
+		border-radius: var(--radius-sm);
+	}
+	.no-photo span {
+		font-family: var(--font-heading);
+		font-size: 11px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: color-mix(in srgb, var(--color-text) 38%, transparent);
+	}
+
+	.disclaimer {
+		margin: 0;
+		padding-top: var(--space-4);
+		border-top: 1px solid var(--color-divider);
+		font-size: 12px;
+		line-height: 1.6;
+		max-width: 60ch;
+		color: color-mix(in srgb, var(--color-text) 55%, transparent);
+	}
+</style>

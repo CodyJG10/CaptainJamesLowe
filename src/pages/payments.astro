@@ -1,0 +1,51 @@
+---
+import LegalPage, { type LegalSection } from '../components/LegalPage.astro';
+import { paymentMethods } from '../data/rates';
+
+const sections: LegalSection[] = [
+	{
+		heading: 'Accepted methods',
+		body: [
+			'Captain James Lowe accepts several payment methods. Wire transfer and Zelle are preferred for the initial deposit.',
+		],
+		list: [...paymentMethods],
+	},
+	{
+		heading: 'All estimates are quoted at the cash price',
+		body: [
+			'Prices quoted on an estimate are discounted cash rates. Where a payment method carries a processing fee — a gateway charge or a card surcharge — that fee is added to the final bill. The amount is set by the payment provider, not by us, and is outside our control.',
+			'Cash, checks, money orders and the electronic apps that do not charge processing fees carry no surcharge.',
+		],
+	},
+	{
+		heading: 'Deposits',
+		body: [
+			'A deposit is required to reserve a place on the calendar and to commission crew. It is typically one third of the estimated job total and must be paid in full no later than four days before departure.',
+			'If you cancel, 50% of the deposit amount is non-refundable. The captain may postpone a departure for weather or for an unsafe vessel, and every effort is made to reschedule on the same terms.',
+		],
+	},
+	{
+		heading: 'Checks',
+		body: [
+			'If you pay by check or money order, please allow enough time for it to arrive and clear at least three days before the departure date.',
+			'Checks are not accepted for final payment unless agreed in advance.',
+		],
+	},
+	{
+		heading: 'Final balance',
+		body: [
+			'The balance, including travel and all pass-through expenses, is due on completion of the delivery — when the vessel is in her slip, tied off, cleaned and handed over.',
+			'Credit card payments can be processed over the phone or in person.',
+		],
+	},
+];
+---
+
+<LegalPage
+	kicker="Payments"
+	heading="How payment works."
+	lede="Deposit terms, accepted methods, and what happens if a payment method carries a fee."
+	title="Payments Accepted | Captain James Lowe Yacht Delivery"
+	description="Accepted payment methods, deposit terms, cancellation policy and final balance for yacht delivery with Captain James Lowe."
+	{sections}
+/>

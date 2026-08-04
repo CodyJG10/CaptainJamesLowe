@@ -1,0 +1,761 @@
+---
+/**
+ * The delivery quote form.
+ *
+ * Replaces a 2,884px-tall RackForms iframe that was 316px wide — unusable on a
+ * phone, and invisible to search engines. Same questions, native markup, four
+ * numbered sections so the length reads as thoroughness rather than a wall.
+ *
+ * Native constraint validation only: `required`, `type`, `inputmode`. No
+ * validation library, and no JavaScript required to submit — the two small
+ * scripts below only add conditional reveals, which degrade to "everything is
+ * visible", not to "the form is broken".
+ */
+import Layout from '../layouts/Layout.astro';
+import { site, FORMSPREE_ENDPOINT, ALLOW_UPLOADS } from '../data/site';
+import { jobTypes } from '../data/services';
+import {
+	US_STATES,
+	YEARS,
+	LENGTHS,
+	BEAMS,
+	DRAFTS,
+	BRIDGE_CLEARANCES,
+	FUEL_CAPACITIES,
+	FUEL_BURN,
+	SPEEDS,
+	EQUIPMENT,
+	ACCOMMODATION,
+	HEARD_ABOUT,
+} from '../data/quoteForm';
+
+const successUrl = new URL('/success', Astro.site).href;
+
+const steps = [
+	'Send this form — about five minutes',
+	'Capt. James reviews it personally, within 24 hours',
+	'The route gets charted and the days counted',
+	'Your estimate arrives by email',
+];
+
+const title = 'Get a Delivery Quote | Captain James Lowe Yacht Delivery';
+const description =
+	'Tell me about the boat and the route. Estimates are produced from your vessel’s specs and cruising speed, and most go back out within 24 hours.';
+---
+
+<Layout {title} {description}>
+	<section class="quote-head">
+		<div class="container">
+			<p class="kicker">Delivery quote / estimate</p>
+			<h1 class="display-2">Tell me about the boat and the route.</h1>
+			<p class="lede">
+				Estimates are produced with the aid of software that populates directly from this form,
+				so accuracy matters — especially the vessel’s cruising speed. Fields marked
+				<abbr title="required" class="req-key">*</abbr> are required.
+			</p>
+		</div>
+	</section>
+
+	<section class="section-tight">
+		<div class="container quote-grid">
+			<form class="form" action={FORMSPREE_ENDPOINT} method="POST" {...(ALLOW_UPLOADS ? { enctype: 'multipart/form-data' } : {})}>
+				<input type="hidden" name="_next" value={successUrl} />
+				<input type="hidden" name="_subject" value="New delivery request — captainjameslowe.com" />
+				<input type="hidden" name="form_source" value="Quote page" />
+				<!-- Honeypot: hidden from people, filled in by bots, discarded by Formspree. -->
+				<input
+					type="text"
+					name="_gotcha"
+					tabindex="-1"
+					autocomplete="off"
+					aria-hidden="true"
+					class="gotcha"
+				/>
+
+				<!-- ── 1. client ── -->
+				<fieldset class="sec">
+					<legend class="sec-legend"><span class="sec-num">01</span> Your details</legend>
+					<p class="sec-note">
+						All fields in this section are required — the address is used to work out crew
+						travel, not for marketing.
+					</p>
+
+					<div class="row row-2">
+						<p class="field">
+							<label for="first_name">First name *</label>
+							<input class="input" id="first_name" name="first_name" required autocomplete="given-name" />
+						</p>
+						<p class="field">
+							<label for="last_name">Last name *</label>
+							<input class="input" id="last_name" name="last_name" required autocomplete="family-name" />
+						</p>
+					</div>
+
+					<p class="field">
+						<label for="address">Street address *</label>
+						<input class="input" id="address" name="address" required autocomplete="street-address" />
+					</p>
+
+					<div class="row row-3">
+						<p class="field">
+							<label for="city">City *</label>
+							<input class="input" id="city" name="city" required autocomplete="address-level2" />
+						</p>
+						<p class="field">
+							<label for="state">State *</label>
+							<select class="input" id="state" name="state" required autocomplete="address-level1">
+								<option value="">Select…</option>
+								{US_STATES.map((s) => <option>{s}</option>)}
+								<option>International</option>
+							</select>
+						</p>
+						<p class="field">
+							<label for="zip">ZIP *</label>
+							<input class="input" id="zip" name="zip" required inputmode="numeric" autocomplete="postal-code" />
+						</p>
+					</div>
+
+					<div class="row row-3">
+						<p class="field">
+							<label for="phone">Phone *</label>
+							<input class="input" id="phone" name="phone" type="tel" required placeholder="727-236-1385" autocomplete="tel" />
+						</p>
+						<p class="field">
+							<label for="email">Email *</label>
+							<input class="input" id="email" name="email" type="email" required autocomplete="email" />
+						</p>
+						<p class="field">
+							<span class="label-as-legend">Can you receive text? *</span>
+							<span class="seg">
+								<label class="seg-opt"><input type="radio" name="can_text" value="Yes" required /> Yes</label>
+								<label class="seg-opt"><input type="radio" name="can_text" value="No" /> No</label>
+							</span>
+						</p>
+					</div>
+				</fieldset>
+
+				<!-- ── 2. job type ── -->
+				<fieldset class="sec">
+					<legend class="sec-legend"><span class="sec-num">02</span> What do you need?</legend>
+					<p class="sec-note">Check all that apply.</p>
+
+					<div class="checks">
+						{
+							jobTypes.map((j) => (
+								<label class="radio check-item">
+									<input type="checkbox" name="job_type" value={j} data-job={j} />
+									<span class="check" />
+									{j}
+								</label>
+							))
+						}
+					</div>
+
+					<p class="conditional" id="sea-trial-note" hidden>
+						Sea trials and single-day captain jobs are offered in central and south Florida
+						only. Outside that area the work is quoted as a delivery, because crew travel
+						dominates the cost of a single day.
+					</p>
+				</fieldset>
+
+				<!-- ── 3. vessel ── -->
+				<fieldset class="sec">
+					<legend class="sec-legend"><span class="sec-num">03</span> The vessel</legend>
+					<p class="sec-note">
+						Mark equipment as working only if it works. The crew plans around what you
+						declare here.
+					</p>
+
+					<div class="row row-2">
+						<p class="field">
+							<label for="boat_name">Boat name — current, not the future one *</label>
+							<input class="input" id="boat_name" name="boat_name" required />
+						</p>
+						<p class="field">
+							<label for="make">Make / builder *</label>
+							<input class="input" id="make" name="make" required placeholder="Beneteau, Hatteras, home built…" />
+						</p>
+					</div>
+
+					<div class="row row-4">
+						<p class="field">
+							<label for="year">Year *</label>
+							<select class="input" id="year" name="year" required>
+								<option value="">Select…</option>
+								{YEARS.map((y) => <option>{y}</option>)}
+							</select>
+						</p>
+						<p class="field">
+							<label for="length">Length overall *</label>
+							<select class="input" id="length" name="length" required>
+								<option value="">Select…</option>
+								{LENGTHS.map((l) => <option>{l}</option>)}
+							</select>
+						</p>
+						<p class="field">
+							<label for="beam">Beam *</label>
+							<select class="input" id="beam" name="beam" required>
+								<option value="">Select…</option>
+								{BEAMS.map((b) => <option>{b}</option>)}
+							</select>
+						</p>
+						<p class="field">
+							<label for="draft">Draft *</label>
+							<select class="input" id="draft" name="draft" required>
+								<option value="">Select…</option>
+								{DRAFTS.map((d) => <option>{d}</option>)}
+							</select>
+						</p>
+					</div>
+
+					<p class="field">
+						<label for="bridge_clearance">
+							Bridge clearance / air draft *
+							<span class="hint">Mast or hardtop height above the water. This decides the route.</span>
+						</label>
+						<select class="input" id="bridge_clearance" name="bridge_clearance" required>
+							<option value="">Select…</option>
+							{BRIDGE_CLEARANCES.map((c) => <option>{c}</option>)}
+						</select>
+					</p>
+
+					<div class="row row-2">
+						<p class="field">
+							<span class="label-as-legend">Type of vessel *</span>
+							<span class="seg">
+								<label class="seg-opt"><input type="radio" name="vessel_type" value="Inboard" required /> Inboard</label>
+								<label class="seg-opt"><input type="radio" name="vessel_type" value="Outboard" /> Outboard</label>
+								<label class="seg-opt"><input type="radio" name="vessel_type" value="Aux Sail" id="type-sail" /> Aux sail</label>
+							</span>
+						</p>
+						<p class="field">
+							<span class="label-as-legend">Fuel type *</span>
+							<span class="seg">
+								<label class="seg-opt"><input type="radio" name="fuel_type" value="Diesel" required /> Diesel</label>
+								<label class="seg-opt"><input type="radio" name="fuel_type" value="Gasoline" /> Gasoline</label>
+							</span>
+						</p>
+					</div>
+
+					<div class="row row-4">
+						<p class="field">
+							<label for="engines">Number of engines *</label>
+							<select class="input" id="engines" name="engines" required>
+								<option value="">Select…</option>
+								<option>1</option><option>2</option><option>3</option><option>4</option>
+							</select>
+						</p>
+						<p class="field">
+							<label for="fuel_capacity">Fuel capacity</label>
+							<select class="input" id="fuel_capacity" name="fuel_capacity">
+								<option value="">Not sure</option>
+								{FUEL_CAPACITIES.map((f) => <option>{f}</option>)}
+							</select>
+						</p>
+						<p class="field">
+							<label for="fuel_burn">Fuel burn, GPH</label>
+							<select class="input" id="fuel_burn" name="fuel_burn">
+								<option value="">Not sure</option>
+								{FUEL_BURN.map((f) => <option>{f}</option>)}
+							</select>
+						</p>
+						<p class="field">
+							<label for="speed">
+								Cruising speed *
+								<span class="hint">Be honest — this drives the day count.</span>
+							</label>
+							<select class="input" id="speed" name="speed" required>
+								<option value="">Select…</option>
+								{SPEEDS.map((s) => <option>{s}</option>)}
+							</select>
+						</p>
+					</div>
+
+					<p class="field conditional-field">
+						<label for="sail_inventory">
+							Sail inventory
+							<span class="hint">Auxiliary sail vessels only.</span>
+						</label>
+						<textarea
+							class="input"
+							id="sail_inventory"
+							name="sail_inventory"
+							disabled
+							placeholder="Main, furling genoa, staysail, condition, reefing…"></textarea>
+					</p>
+
+					<div class="row row-2">
+						<p class="field">
+							<label for="registration">Registration number</label>
+							<input class="input" id="registration" name="registration" />
+						</p>
+						<p class="field">
+							<label for="documentation">Documentation number</label>
+							<input class="input" id="documentation" name="documentation" />
+						</p>
+					</div>
+
+					<p class="field">
+						<label for="accommodation">Sleeping and cooking accommodation *</label>
+						<select class="input" id="accommodation" name="accommodation" required>
+							<option value="">Select…</option>
+							{ACCOMMODATION.map((a) => <option>{a}</option>)}
+						</select>
+					</p>
+
+					<div class="equipment">
+						<p class="equipment-head">Equipment aboard — working only</p>
+						<div class="checks checks-tight">
+							{
+								EQUIPMENT.map((e) => (
+									<label class="radio check-item">
+										<input type="checkbox" name="equipment" value={e.label} />
+										<span class="check" />
+										{e.label}
+									</label>
+								))
+							}
+						</div>
+					</div>
+				</fieldset>
+
+				<!-- ── 4. passage ── -->
+				<fieldset class="sec">
+					<legend class="sec-legend"><span class="sec-num">04</span> The passage</legend>
+					<p class="sec-note">
+						Include the city, state and marina name for both ends — the route is charted from
+						these, not from a general area.
+					</p>
+
+					<div class="row row-2">
+						<p class="field">
+							<label for="departure">Departure *</label>
+							<input class="input" id="departure" name="departure" required placeholder="Marina, city, state" />
+						</p>
+						<p class="field">
+							<label for="destination">Destination *</label>
+							<input class="input" id="destination" name="destination" required placeholder="Marina, city, state" />
+						</p>
+					</div>
+
+					<div class="row row-3">
+						<p class="field">
+							<label for="departure_date">Requested departure date *</label>
+							<input class="input" id="departure_date" name="departure_date" type="date" required />
+						</p>
+						<p class="field">
+							<span class="label-as-legend">Date is *</span>
+							<span class="seg">
+								<label class="seg-opt"><input type="radio" name="date_flexibility" value="Depart by" required /> Depart by</label>
+								<label class="seg-opt"><input type="radio" name="date_flexibility" value="Flexible" /> Flexible</label>
+							</span>
+						</p>
+						<p class="field">
+							<span class="label-as-legend">Is the vessel sea ready? *</span>
+							<span class="seg">
+								<label class="seg-opt"><input type="radio" name="sea_ready" value="Yes" required /> Yes</label>
+								<label class="seg-opt"><input type="radio" name="sea_ready" value="No" /> No</label>
+								<label class="seg-opt"><input type="radio" name="sea_ready" value="Not sure" /> Not sure</label>
+							</span>
+						</p>
+					</div>
+
+					<div class="row row-2">
+						<p class="field">
+							<label for="pre_purchase">Is this a pre-purchase? *</label>
+							<select class="input" id="pre_purchase" name="pre_purchase" required>
+								<option value="">Select…</option>
+								<option>Yes — pre-closing</option>
+								<option>No — I already own her</option>
+							</select>
+						</p>
+						<p class="field">
+							<label for="joining">Will you or any passengers be joining us? *</label>
+							<select class="input" id="joining" name="joining" required>
+								<option value="">Select…</option>
+								<option>No — deliver her without me</option>
+								<option>Yes — I will be aboard</option>
+								<option>Yes — me and others</option>
+								<option>Part of the passage</option>
+							</select>
+						</p>
+					</div>
+
+					{
+						ALLOW_UPLOADS ? (
+							<div class="row row-2">
+								<p class="field">
+									<label for="docs">
+										Survey or documents
+										<span class="hint">PDF or Word, 2 MB max.</span>
+									</label>
+									<input class="input" id="docs" name="docs" type="file" accept=".pdf,.doc,.docx" />
+								</p>
+								<p class="field">
+									<label for="photos">
+										Photographs
+										<span class="hint">2 MB max.</span>
+									</label>
+									<input class="input" id="photos" name="photos" type="file" accept="image/*" />
+								</p>
+							</div>
+						) : (
+							<p class="conditional">
+								Have a survey, documentation or photographs? Send this form first, then reply
+								to the confirmation email with the files attached — that keeps everything on
+								one thread.
+							</p>
+						)
+					}
+
+					<div class="row row-2">
+						<p class="field">
+							<label for="heard_about">How did you hear about us? *</label>
+							<select class="input" id="heard_about" name="heard_about" required>
+								<option value="">Select…</option>
+								{HEARD_ABOUT.map((h) => <option>{h}</option>)}
+							</select>
+						</p>
+						<p class="field">
+							<label for="search_term">
+								If a search engine — what did you search for?
+								<span class="hint">Genuinely useful. It tells me which pages are working.</span>
+							</label>
+							<input class="input" id="search_term" name="search_term" />
+						</p>
+					</div>
+
+					<p class="field">
+						<label for="message">Anything else</label>
+						<textarea
+							class="input"
+							id="message"
+							name="message"
+							rows="5"
+							placeholder="Clarify anything above, or tell me what you are worried about."></textarea>
+					</p>
+				</fieldset>
+
+				<div class="submit">
+					<button class="btn btn-primary btn-lg" type="submit">Send my delivery request</button>
+					<p class="privacy">
+						We do not share, rent or sell your information. Data is collected only to produce
+						the estimate you asked for.
+					</p>
+				</div>
+			</form>
+
+			<!-- ── sidebar ── -->
+			<aside class="side">
+				<div class="side-card">
+					<h2 class="side-head">Rather just talk?</h2>
+					<a class="side-phone" href={site.phoneHref}>{site.phoneDisplay}</a>
+					<p class="side-sub">
+						Capt. James Lowe · {site.license} · {site.baseLabel}
+					</p>
+				</div>
+
+				<div class="side-card">
+					<h2 class="side-head">What happens next</h2>
+					<ol class="side-steps">
+						{steps.map((s) => <li>{s}</li>)}
+					</ol>
+				</div>
+
+				<div class="side-card">
+					<h2 class="side-head">Before you send</h2>
+					<p class="side-body">
+						Have the vessel’s length overall, draft, air draft and honest cruising speed to
+						hand. Speed drives the day count, and the day count drives the price — see
+						<a href="/rates">rates and fees</a>.
+					</p>
+				</div>
+			</aside>
+		</div>
+	</section>
+</Layout>
+
+<script is:inline>
+	(() => {
+		/* Sail inventory is only answerable on an auxiliary sail vessel. It stays
+		   in the DOM and simply enables — a disabled field explains itself,
+		   a missing one does not. */
+		const sail = document.getElementById('type-sail');
+		const inventory = document.getElementById('sail_inventory');
+		if (sail && inventory) {
+			const sync = () => {
+				inventory.disabled = !sail.checked;
+			};
+			document
+				.querySelectorAll('input[name="vessel_type"]')
+				.forEach((r) => r.addEventListener('change', sync));
+			sync();
+		}
+
+		/* Sea trials carry a service-area restriction worth surfacing at the
+		   moment someone asks for one, rather than in a reply two days later. */
+		const note = document.getElementById('sea-trial-note');
+		const trial = document.querySelector('input[data-job="Sea Trial"]');
+		if (note && trial) {
+			const sync = () => {
+				note.hidden = !trial.checked;
+			};
+			trial.addEventListener('change', sync);
+			sync();
+		}
+	})();
+</script>
+
+<style>
+	.quote-head {
+		padding-block: clamp(34px, 4.5vw, 64px) clamp(26px, 3.4vw, 44px);
+		border-bottom: 1px solid var(--color-divider);
+	}
+	.quote-head .display-2 {
+		max-width: 20ch;
+	}
+	.req-key {
+		color: var(--color-accent);
+		text-decoration: none;
+		border: 0;
+	}
+
+	.quote-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+		gap: clamp(30px, 5vw, 72px);
+		align-items: start;
+	}
+	@media (max-width: 980px) {
+		.quote-grid {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	.gotcha {
+		position: absolute;
+		left: -9999px;
+		opacity: 0;
+		height: 0;
+		width: 0;
+	}
+
+	/* — sections — */
+	.sec {
+		border: 0;
+		border-top: 1px solid var(--color-divider);
+		margin: 0;
+		padding: clamp(28px, 3.6vw, 44px) 0 clamp(14px, 2vw, 22px);
+	}
+	.sec:first-of-type {
+		border-top: 0;
+		padding-top: 0;
+	}
+	.sec-legend {
+		display: flex;
+		align-items: baseline;
+		gap: var(--space-3);
+		font-family: var(--font-heading);
+		font-weight: 400;
+		font-size: clamp(24px, 2.6vw, 34px);
+		line-height: 1.1;
+		padding: 0;
+		margin-bottom: var(--space-3);
+	}
+	.sec-num {
+		font-size: 13px;
+		letter-spacing: 0.12em;
+		color: var(--color-accent);
+		font-variant-numeric: tabular-nums;
+	}
+	.sec-note {
+		margin: 0 0 clamp(22px, 2.6vw, 32px);
+		font-size: 13.5px;
+		line-height: 1.65;
+		max-width: 62ch;
+		color: color-mix(in srgb, var(--color-text) 70%, transparent);
+	}
+
+	/* — rows — */
+	.row {
+		display: grid;
+		gap: var(--space-4) clamp(14px, 1.8vw, 22px);
+		margin-bottom: var(--space-4);
+	}
+	.row-2 {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	.row-3 {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+	.row-4 {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
+	@media (max-width: 760px) {
+		.row-3,
+		.row-4 {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+	@media (max-width: 520px) {
+		.row-2,
+		.row-3,
+		.row-4 {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	.field {
+		margin: 0 0 var(--space-4);
+	}
+	.row .field {
+		margin-bottom: 0;
+	}
+	.field :global(label),
+	.label-as-legend {
+		display: block;
+		font-size: 12px;
+		margin-bottom: 5px;
+		color: color-mix(in srgb, var(--color-text) 70%, transparent);
+	}
+	.hint {
+		display: block;
+		font-size: 11px;
+		line-height: 1.45;
+		margin-top: 2px;
+		color: color-mix(in srgb, var(--color-text) 50%, transparent);
+	}
+	/* 16px keeps iOS from zooming the viewport when a field takes focus. */
+	.field :global(.input) {
+		font-size: 16px;
+		min-height: 42px;
+	}
+	.seg {
+		display: inline-flex;
+		flex-wrap: wrap;
+	}
+
+	/* — checkbox grids — */
+	.checks {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+		gap: var(--space-3) var(--space-4);
+	}
+	.checks-tight {
+		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+		gap: var(--space-2) var(--space-4);
+	}
+	.check-item {
+		font-size: 14px;
+		line-height: 1.35;
+		align-items: start;
+	}
+	.check-item :global(.check) {
+		margin-top: 2px;
+	}
+
+	.equipment {
+		margin-top: clamp(22px, 2.6vw, 30px);
+		padding-top: var(--space-4);
+		border-top: 1px solid var(--color-divider);
+	}
+	.equipment-head {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: 11px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--color-accent);
+		margin: 0 0 var(--space-4);
+	}
+
+	.conditional {
+		margin: var(--space-4) 0 0;
+		border-left: 2px solid var(--color-accent);
+		padding: var(--space-2) 0 var(--space-2) var(--space-4);
+		font-size: 13.5px;
+		line-height: 1.65;
+		max-width: 66ch;
+	}
+	.conditional[hidden] {
+		display: none;
+	}
+
+	.submit {
+		padding-top: clamp(22px, 2.8vw, 32px);
+		border-top: 1px solid var(--color-divider);
+	}
+	.privacy {
+		margin: var(--space-4) 0 0;
+		font-size: 12px;
+		line-height: 1.6;
+		max-width: 56ch;
+		color: color-mix(in srgb, var(--color-text) 58%, transparent);
+	}
+
+	/* — sidebar — */
+	.side {
+		position: sticky;
+		top: var(--space-6);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+	}
+	@media (max-width: 980px) {
+		.side {
+			position: static;
+		}
+	}
+	.side-card {
+		border: 1px solid var(--color-divider);
+		border-radius: var(--radius-md);
+		padding: clamp(20px, 2.2vw, 26px);
+	}
+	.side-head {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: 11px;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--color-accent);
+		margin: 0 0 var(--space-3);
+		padding-bottom: var(--space-2);
+		border-bottom: 1px solid var(--color-divider);
+	}
+	.side-phone {
+		display: block;
+		font-family: var(--font-heading);
+		font-size: clamp(24px, 2.4vw, 30px);
+		color: inherit;
+		text-decoration: none;
+		font-variant-numeric: tabular-nums;
+	}
+	.side-phone:hover {
+		color: var(--color-accent);
+	}
+	.side-sub {
+		margin: var(--space-2) 0 0;
+		font-size: 12px;
+		line-height: 1.55;
+		color: color-mix(in srgb, var(--color-text) 60%, transparent);
+	}
+	.side-steps {
+		margin: 0;
+		padding-left: 1.15em;
+		font-size: 13px;
+		line-height: 1.6;
+	}
+	.side-steps li {
+		margin-bottom: var(--space-2);
+	}
+	.side-steps li::marker {
+		color: var(--color-accent);
+		font-family: var(--font-heading);
+	}
+	.side-body {
+		margin: 0;
+		font-size: 13px;
+		line-height: 1.65;
+		color: color-mix(in srgb, var(--color-text) 78%, transparent);
+	}
+</style>

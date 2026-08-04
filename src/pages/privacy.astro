@@ -1,0 +1,54 @@
+---
+import LegalPage, { type LegalSection } from '../components/LegalPage.astro';
+
+const sections: LegalSection[] = [
+	{
+		heading: 'What we collect, and why',
+		body: [
+			'The delivery form collects your contact details, your vessel’s specification and your intended route. That information exists for one purpose: to chart the passage, calculate transit time and produce the estimate you asked for.',
+			'Your information is kept private. It is not sold, rented or shared with anyone.',
+		],
+	},
+	{
+		heading: 'Cookies and analytics',
+		body: [
+			'This site sets no advertising or tracking cookies of its own.',
+			'If website analytics are enabled, they are used only to understand which pages are useful to visitors — never to build a profile of an individual, and never shared or sold.',
+		],
+	},
+	{
+		heading: 'Form submissions',
+		body: [
+			'Form submissions are delivered by a third-party form service, which processes the message in order to send it on. Beyond that delivery, submissions are held only in the captain’s own email and estimating records.',
+		],
+	},
+	{
+		heading: 'Photographs and video',
+		body: [
+			'Captain James Lowe photographs and films vessels and voyages in the course of the work. By engaging our services you grant permission for those images and recordings — of the vessel and of the voyage — to be used for publicity, illustration, advertising, and web and social media content.',
+			'If you would prefer your vessel not to appear, say so before departure and it will be respected. This is a courtesy we are glad to extend and it costs nothing to ask for.',
+		],
+	},
+	{
+		heading: 'Your choices',
+		body: [
+			'You may ask what information is held about you, ask for it to be corrected, or ask for it to be deleted. Call the number on this site and it will be handled.',
+		],
+	},
+	{
+		heading: 'Changes to this policy',
+		body: [
+			'Any changes to this policy will be published on this page.',
+		],
+	},
+];
+---
+
+<LegalPage
+	kicker="Privacy"
+	heading="What we do with your information."
+	lede="Short version: we use it to produce your estimate, and we do not sell, rent or share it."
+	title="Privacy Policy | Captain James Lowe Yacht Delivery"
+	description="What information the delivery form collects, what it is used for, and the commitment that it is never sold, rented or shared."
+	{sections}
+/>

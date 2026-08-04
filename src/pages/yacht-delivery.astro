@@ -1,0 +1,275 @@
+---
+/**
+ * The flagship page. Kept at a top-level URL rather than under /services/ —
+ * this is the primary keyword and the old site's rankings sit on
+ * /yacht_delivery.php, which now 301s here.
+ */
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+import FinalCta from '../components/FinalCta.astro';
+import FaqList from '../components/FaqList.astro';
+import Plate from '../components/Plate.astro';
+import { site } from '../data/site';
+import { passages } from '../data/passages';
+import { faqs, faqsByTopic, faqSchema } from '../data/faqs';
+import { areaCount } from '../data/serviceArea';
+import { inline } from '../lib/inline';
+
+import imgMotorYachtWake from '../assets/cjl/stock/motor-yacht-underway-wake.jpg';
+import imgHelmView from '../assets/cjl/site/helm-view-offshore.jpg';
+import imgNoLand from '../assets/cjl/site/no-land-in-sight.jpg';
+import imgSunset from '../assets/cjl/site/sunset-georgetown.jpg';
+
+const vesselTypes = [
+	'Sailing yachts',
+	'Motor yachts',
+	'Powerboats',
+	'Cruisers',
+	'Trawlers',
+	'Sportfishermen',
+	'Catamarans',
+	'Commercial vessels',
+];
+
+const included = [
+	{
+		title: 'One-way deliveries, owners optional',
+		body: 'With or without you aboard. Owners and family are welcome to join for all or part of the passage, and most who do come off the boat knowing her far better.',
+	},
+	{
+		title: 'Inspections before, during and after',
+		body: 'The vessel and her systems are checked before departure, monitored under way, and handed over in a documented condition at the other end.',
+	},
+	{
+		title: 'Regular progress updates',
+		body: 'You hear where your boat is and how she is running, without having to chase anyone for it.',
+	},
+	{
+		title: 'Observations and recommendations',
+		body: 'A written report on what we found. Several days of continuous running surfaces things a dockside survey never will.',
+	},
+	{
+		title: 'Daylight transits where the schedule allows',
+		body: 'We run in daylight wherever the passage permits it — it is the single biggest safety lever on an unfamiliar boat.',
+	},
+	{
+		title: 'Living aboard for the duration',
+		body: 'The crew lives on the boat for the voyage. That is what the provisions line on the estimate covers.',
+	},
+];
+
+const passageFaqs = faqsByTopic('passage').slice(0, 6);
+
+const title = 'Yacht Delivery | Move Boats Over Water by Licensed Captain';
+const description =
+	'Year-round yacht delivery on the Atlantic and Gulf coasts, the ICW, inland rivers, the Great Lakes, Florida, the Bahamas, the Caribbean and Canada. Sail and power, moved under their own power by a USCG 200-ton master and professional crew.';
+
+const serviceSchema = {
+	'@type': 'Service',
+	'@id': `${site.url}/yacht-delivery#service`,
+	name: 'Yacht delivery',
+	description,
+	serviceType: 'Yacht delivery and boat relocation',
+	provider: { '@id': `${site.url}/#business` },
+};
+---
+
+<Layout {title} {description} jsonLd={[serviceSchema, faqSchema(passageFaqs)]}>
+	<PageHero
+		kicker="Yacht delivery"
+		heading="Repositioning sail and power yachts, over the water."
+		lede="Local runs and long passages: the Atlantic East and Gulf coasts, the Intracoastal Waterway, the navigable US inland rivers, the Great Lakes, Florida, the Bahamas, the Caribbean and Canada."
+		image={imgMotorYachtWake}
+		imageAlt="A flybridge motor yacht underway on open water, throwing a wake"
+	/>
+
+	<section class="section">
+		<div class="container split">
+			<div>
+				<p class="kicker">What we move</p>
+				<h2 class="display-3 no-optical">Vessels we take on</h2>
+				<ul class="chips">
+					{vesselTypes.map((v) => <li class="tag tag-outline">{v}</li>)}
+				</ul>
+				<div class="prose">
+					<p set:html={inline(
+						'For long distances that means **sailboats over 27 feet and powerboats over 30 feet**, and anything larger of either kind. Crew is scaled to the boat and the passage: sailboats take a captain plus one or more deckhands, more for round-the-clock running or anything over 65 feet. Powerboats take a captain plus one or more, scaled up with size.',
+					)} />
+					<p>
+						A significant share of our clients are new boat buyers moving a freshly purchased
+						vessel to her home port — often across water they have never run.
+					</p>
+				</div>
+			</div>
+			<Plate
+				src={imgNoLand}
+				alt="The view forward over a boat’s bow rail and dinghy toward open water and distant channel markers"
+				ratio="4/3"
+				sizes="(max-width: 860px) 100vw, 42vw"
+			/>
+		</div>
+	</section>
+
+	<section class="section band-surface">
+		<div class="container">
+			<header class="section-head">
+				<p class="kicker">How we run</p>
+				<h2 class="display-3">What a delivery includes</h2>
+				<p class="lede">
+					Weather windows, bridge and lock schedules, fuel stops and dockage all get planned
+					before departure — and re-planned as the water dictates.
+				</p>
+			</header>
+			<div class="grid grid-3 included">
+				{
+					included.map((f) => (
+						<article class="inc-item">
+							<h3 class="inc-title">{f.title}</h3>
+							<p class="inc-body">{f.body}</p>
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<header class="section-head">
+				<p class="kicker">Waters we know by name</p>
+				<h2 class="display-3">Passages with their own rules.</h2>
+				<p class="lede">
+					Some routes come with locks that keep office hours, a lift bridge that decides
+					whether your mast fits, or a current that turns a pleasant crossing into a bad one.
+				</p>
+			</header>
+			<div class="grid grid-3 passage-grid">
+				{
+					passages.map((p) => (
+						<a class="passage-card" href={`/passages/${p.slug}`}>
+							<Plate
+								src={p.cardImage}
+								alt={p.cardImageAlt}
+								ratio="3/2"
+								sizes="(max-width: 560px) 100vw, (max-width: 900px) 50vw, 33vw"
+							/>
+							<h3 class="passage-title">{p.name}</h3>
+							<p class="passage-body">{p.summary}</p>
+						</a>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<section class="section band-surface">
+		<div class="container split split-reverse">
+			<Plate
+				src={imgHelmView}
+				alt="The view forward from a flybridge helm offshore, compass in the foreground and open water ahead"
+				ratio="4/3"
+				sizes="(max-width: 860px) 100vw, 45vw"
+			/>
+			<div>
+				<p class="kicker">Coverage</p>
+				<h2 class="display-3 no-optical">{areaCount} regions, and the list is not exhaustive.</h2>
+				<div class="prose">
+					<p>
+						The full Atlantic seaboard from Canada to the Caribbean, the Gulf Coast, every
+						navigable inland river from Minnesota to the Gulf of Mexico, the Great Lakes, both
+						Intracoastal Waterways, the Bahamas and the Caribbean.
+					</p>
+					<p>
+						If your port is not on the list, ask anyway — the list is where we have been, not
+						where we can go.
+					</p>
+				</div>
+				<a class="arrow-link" href="/service-area">
+					Every state and waterway <span class="arrow">→</span>
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<header class="section-head">
+				<p class="kicker">On passage</p>
+				<h2 class="display-3">What owners ask before they book.</h2>
+			</header>
+			<FaqList items={passageFaqs} />
+			<p class="faq-foot">
+				<a class="arrow-link" href="/faq">{`All ${faqs.length} questions`} <span class="arrow">→</span></a>
+			</p>
+		</div>
+	</section>
+
+	<FinalCta
+		kicker="Start here"
+		heading="Ready for numbers?"
+		body="Send the vessel details and the route, and I will send back an estimate. Most go out within 24 hours."
+		image={imgSunset}
+		imageAlt="Sunset over a marina seen from a boat’s deck, with a piling and dock in view"
+	/>
+</Layout>
+
+<style>
+	.section-head {
+		max-width: 62ch;
+		margin-bottom: clamp(30px, 4vw, 52px);
+	}
+
+	.chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+		list-style: none;
+		margin: 0 0 var(--space-6);
+		padding: 0;
+	}
+
+	/* — what's included — */
+	.inc-item {
+		padding-top: var(--space-4);
+		border-top: 1px solid var(--color-divider);
+	}
+	.inc-title {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: clamp(17px, 1.6vw, 20px);
+		line-height: 1.25;
+		margin: 0 0 var(--space-2);
+	}
+	.inc-body {
+		margin: 0;
+		font-size: 13.5px;
+		line-height: 1.68;
+		color: color-mix(in srgb, var(--color-text) 78%, transparent);
+	}
+
+	/* — passages — */
+	.passage-card {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+	}
+	.passage-title {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: clamp(19px, 1.8vw, 23px);
+		margin: var(--space-3) 0 var(--space-1);
+	}
+	.passage-card:hover .passage-title {
+		color: var(--color-accent);
+	}
+	.passage-body {
+		margin: 0;
+		font-size: 13.5px;
+		line-height: 1.62;
+		color: color-mix(in srgb, var(--color-text) 76%, transparent);
+	}
+
+	.faq-foot {
+		margin: clamp(24px, 3vw, 36px) 0 0;
+	}
+</style>

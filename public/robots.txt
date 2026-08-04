@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# The old site carried `User-agent: GPTBot / Disallow: /`, which blocked the
+# business from AI search results entirely. Removed deliberately — a delivery
+# captain has everything to gain from being quotable.
+# TODO(launch): confirm with James that he wants it left open.
+
+Sitemap: https://www.captainjameslowe.com/sitemap-index.xml

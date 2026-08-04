@@ -1,0 +1,176 @@
+---
+/** The services hub — the flagship plus the six that grew out of it. */
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+import FinalCta from '../components/FinalCta.astro';
+import Plate from '../components/Plate.astro';
+import { services } from '../data/services';
+import { site } from '../data/site';
+import imgHelmView from '../assets/cjl/site/helm-view-offshore.jpg';
+import imgMotorYachtHaze from '../assets/cjl/stock/motor-yacht-underway-haze.jpg';
+import imgChartPlot from '../assets/cjl/stock/nautical-chart-plot.jpg';
+
+const itemList = {
+	'@type': 'ItemList',
+	name: 'Services',
+	itemListElement: [
+		{
+			'@type': 'ListItem',
+			position: 1,
+			name: 'Yacht delivery',
+			url: `${site.url}/yacht-delivery`,
+		},
+		...services.map((s, i) => ({
+			'@type': 'ListItem',
+			position: i + 2,
+			name: s.name,
+			url: `${site.url}/services/${s.slug}`,
+		})),
+	],
+};
+
+const title = 'Services | Yacht Delivery, Training, Check Rides and Captain for Hire';
+const description =
+	'Yacht delivery, hands-on boat handling training, insurance check rides, relief captain work, sea trials and sailboat delivery — by a USCG 200-ton licensed master.';
+---
+
+<Layout {title} {description} jsonLd={[itemList]}>
+	<PageHero
+		kicker="Services"
+		heading="One trade, and the work that grew around it."
+		lede="Moving boats is the business. Everything else on this page exists because the people who hire us for a delivery usually need something else too — to learn the boat, to satisfy an underwriter, or to have a professional aboard for a passage they would rather not run alone."
+		image={imgMotorYachtHaze}
+		imageAlt="A flybridge motor yacht underway in warm haze, with a ship on the horizon"
+	/>
+
+	<section class="section">
+		<div class="container">
+			<a class="flagship" href="/yacht-delivery">
+				<div class="flagship-copy">
+					<p class="card-kicker">The flagship</p>
+					<h2 class="flagship-title">Yacht delivery</h2>
+					<p class="flagship-body">
+						Repositioning sail and power yachts between destinations over the water, using the
+						vessel’s own hull and propulsion — with or without owners aboard. Local runs and
+						long passages along the Atlantic and Gulf coasts, the Intracoastal, the navigable
+						inland rivers, the Great Lakes, Florida, the Bahamas, the Caribbean and Canada.
+					</p>
+					<span class="arrow-link">Yacht delivery <span class="arrow">→</span></span>
+				</div>
+				<Plate
+					src={imgHelmView}
+					alt="The view forward from a flybridge helm offshore, compass in the foreground and open water ahead"
+					ratio="4/3"
+					sizes="(max-width: 860px) 100vw, 45vw"
+				/>
+			</a>
+		</div>
+	</section>
+
+	<section class="section band-surface">
+		<div class="container">
+			<header class="section-head">
+				<p class="kicker">Also available</p>
+				<h2 class="display-3">The rest of the work.</h2>
+			</header>
+
+			<div class="grid grid-3 svc-grid">
+				{
+					services.map((s) => (
+						<a class="svc-card" href={`/services/${s.slug}`}>
+							<Plate
+								src={s.cardImage}
+								alt={s.cardImageAlt}
+								ratio="3/2"
+								sizes="(max-width: 560px) 100vw, (max-width: 900px) 50vw, 33vw"
+							/>
+							<p class="card-kicker svc-kicker">{s.cardKicker}</p>
+							<h3 class="svc-title">{s.name}</h3>
+							<p class="svc-body">{s.cardBody}</p>
+							<span class="arrow-link">
+								{s.name} <span class="arrow">→</span>
+							</span>
+						</a>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<FinalCta
+		kicker="Start here"
+		heading="Not sure which one you need?"
+		body="Describe the boat and what you are trying to accomplish. If it is a job for a licensed captain, I will tell you which service it falls under — and if it is not, I will tell you that too."
+		image={imgChartPlot}
+		imageAlt="A Mercator nautical chart with a course plotted in red"
+	/>
+</Layout>
+
+<style>
+	.section-head {
+		max-width: 62ch;
+		margin-bottom: clamp(30px, 4vw, 52px);
+	}
+
+	/* — the flagship, given its own weight — */
+	.flagship {
+		display: grid;
+		grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+		gap: clamp(28px, 5vw, 72px);
+		align-items: center;
+		padding: clamp(24px, 3vw, 40px);
+		border: 1px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
+		border-radius: var(--radius-md);
+		text-decoration: none;
+		color: inherit;
+	}
+	.flagship:hover {
+		border-color: var(--color-accent);
+	}
+	.flagship-title {
+		font-family: var(--font-heading);
+		font-weight: 400;
+		font-size: clamp(30px, 3.6vw, 46px);
+		line-height: 1.08;
+		margin: var(--space-2) 0 var(--space-3);
+	}
+	.flagship-body {
+		font-size: 15px;
+		line-height: 1.68;
+		margin: 0 0 var(--space-4);
+		color: color-mix(in srgb, var(--color-text) 82%, transparent);
+	}
+	@media (max-width: 860px) {
+		.flagship {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	/* — the six — */
+	.svc-card {
+		display: flex;
+		flex-direction: column;
+		text-decoration: none;
+		color: inherit;
+	}
+	.svc-kicker {
+		margin: var(--space-3) 0 var(--space-1);
+	}
+	.svc-title {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: clamp(19px, 1.8vw, 24px);
+		line-height: 1.2;
+		margin: 0 0 var(--space-2);
+	}
+	.svc-card:hover .svc-title {
+		color: var(--color-accent);
+	}
+	.svc-body {
+		font-size: 13.5px;
+		line-height: 1.65;
+		margin: 0 0 var(--space-3);
+		flex: 1;
+		color: color-mix(in srgb, var(--color-text) 76%, transparent);
+	}
+</style>

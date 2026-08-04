@@ -1,0 +1,61 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+import FinalCta from '../components/FinalCta.astro';
+import FaqList from '../components/FaqList.astro';
+import { faqs, faqSections, faqsByTopic, faqSchema } from '../data/faqs';
+import { site } from '../data/site';
+import imgHelmCompass from '../assets/cjl/stock/helm-compass-twilight.jpg';
+
+const title = 'Yacht Delivery FAQs | What Owners Ask Before They Book';
+const description =
+	'Booking and scheduling, what your vessel needs aboard, life on passage, and what gets billed on top of the daily rate — answered by a USCG 200-ton licensed master.';
+---
+
+<Layout {title} {description} jsonLd={[faqSchema(faqs)]}>
+	<PageHero
+		kicker="Questions"
+		heading="The things owners ask first."
+		lede={`${faqs.length} questions, grouped by when they usually come up. If yours is not here, calling is the fastest way to an answer.`}
+	>
+		<div slot="actions" class="hero-actions">
+			<a class="btn btn-primary btn-lg" href={site.phoneHref}>Call {site.phoneDisplay}</a>
+			<a class="btn btn-secondary btn-lg" href="/quote">Get a quote</a>
+		</div>
+	</PageHero>
+
+	{
+		faqSections.map((sec, i) => (
+			<section class:list={['section', { 'band-surface': i % 2 === 1 }]}>
+				<div class="container">
+					<header class="section-head">
+						<p class="kicker">{sec.heading}</p>
+						<h2 class="display-3">{sec.blurb}</h2>
+					</header>
+					<FaqList items={faqsByTopic(sec.topic)} />
+				</div>
+			</section>
+		))
+	}
+
+	<FinalCta
+		kicker="Still have a question?"
+		heading="Call the captain."
+		body="It is the fastest way to an answer, and you will be talking to the person who would be aboard. If the delivery is time-sensitive, say so."
+		image={imgHelmCompass}
+		imageAlt="A sailboat’s wheel and binnacle compass lit at twilight"
+	/>
+</Layout>
+
+<style>
+	.section-head {
+		max-width: 62ch;
+		margin-bottom: clamp(26px, 3.4vw, 44px);
+	}
+	.hero-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-3);
+		margin-top: clamp(24px, 3vw, 34px);
+	}
+</style>

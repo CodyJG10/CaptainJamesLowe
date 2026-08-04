@@ -1,0 +1,54 @@
+---
+import LegalPage, { type LegalSection } from '../components/LegalPage.astro';
+
+const sections: LegalSection[] = [
+	{
+		heading: 'General',
+		body: [
+			'The information on this site is published in good faith and for general information only. Rates, fees, distances, clearances, lock hours and government charges change; figures are correct as published and should be confirmed before you rely on them for a passage or a budget.',
+			'Nothing on this site is navigational advice. Charts, the Coast Pilot, the Light List and the Local Notice to Mariners are the authorities for that, and no page here replaces them.',
+		],
+	},
+	{
+		heading: 'Insurance and documentation',
+		body: [
+			'The vessel must be insured, and the owner is responsible for confirming that the policy covers operation by a licensed master captain. Documentation and/or state registration must be aboard, together with a letter appointing Captain James Lowe as the owner’s agent.',
+		],
+	},
+	{
+		heading: 'Vessel condition',
+		body: [
+			'The owner is responsible for presenting a vessel that is sound and seaworthy, with engines in good running order and recently serviced, working navigation electronics, and all USCG-required safety equipment aboard and in date.',
+			'A delivery may be postponed or declined where, in the captain’s judgement, the vessel is not fit to make the passage safely. That judgement is not negotiable and is exercised in the owner’s interest as much as the crew’s.',
+		],
+	},
+	{
+		heading: 'Loss or damage — hold harmless',
+		body: [
+			'Captain James Lowe is not responsible for normal wear and tear arising from a vessel being operated as intended, nor for the failure of a vessel, its machinery or its equipment while being operated prudently.',
+			'Nor is he responsible for loss or damage arising from vandalism, fire, theft, piracy, acts of war, actions of government or port authorities, or acts of God — including storms, wind, lightning, shoaling, and floating or partly submerged objects.',
+		],
+	},
+	{
+		heading: 'Routing',
+		body: [
+			'The captain reserves the right to alter course, route and schedule at any time in the interest of the safety of the vessel and her crew.',
+		],
+	},
+	{
+		heading: 'External links',
+		body: [
+			'This site links to outside resources — government agencies, chart and weather sources, and industry bodies. We do not control those sites and are not responsible for their content or availability.',
+		],
+	},
+];
+---
+
+<LegalPage
+	kicker="Disclaimer"
+	heading="Terms, limits and responsibilities."
+	lede="What this site is and is not, what the owner is responsible for, and the limits on the captain’s liability."
+	title="Disclaimer | Captain James Lowe Yacht Delivery"
+	description="Terms covering vessel condition, insurance and documentation, routing authority, and the limits of liability on a yacht delivery."
+	{sections}
+/>

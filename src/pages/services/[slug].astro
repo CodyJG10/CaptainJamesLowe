@@ -1,0 +1,273 @@
+---
+/**
+ * Service detail pages — one template, six pages.
+ *
+ * Sections render conditionally, so a service that has no `detail` block or no
+ * `aside` simply skips them rather than needing its own template.
+ */
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/PageHero.astro';
+import FinalCta from '../../components/FinalCta.astro';
+import Plate from '../../components/Plate.astro';
+import { services, servicesBySlug, type Service } from '../../data/services';
+import { site } from '../../data/site';
+import { inline } from '../../lib/inline';
+import imgChartPlot from '../../assets/cjl/stock/nautical-chart-plot.jpg';
+
+export function getStaticPaths() {
+	return services.map((s) => ({ params: { slug: s.slug }, props: { service: s } }));
+}
+
+interface Props {
+	service: Service;
+}
+const { service } = Astro.props;
+
+const related = service.related
+	.map((slug) => servicesBySlug[slug])
+	.filter((s): s is Service => Boolean(s));
+
+const serviceSchema = {
+	'@type': 'Service',
+	'@id': `${site.url}/services/${service.slug}#service`,
+	name: service.name,
+	description: service.metaDescription,
+	serviceType: service.name,
+	provider: { '@id': `${site.url}/#business` },
+	areaServed: [
+		{ '@type': 'Country', name: 'United States' },
+		{ '@type': 'Country', name: 'Bahamas' },
+	],
+};
+
+const breadcrumbs = {
+	'@type': 'BreadcrumbList',
+	itemListElement: [
+		{ '@type': 'ListItem', position: 1, name: 'Home', item: site.url },
+		{ '@type': 'ListItem', position: 2, name: 'Services', item: `${site.url}/services` },
+		{
+			'@type': 'ListItem',
+			position: 3,
+			name: service.name,
+			item: `${site.url}/services/${service.slug}`,
+		},
+	],
+};
+---
+
+<Layout
+	title={service.metaTitle}
+	description={service.metaDescription}
+	jsonLd={[serviceSchema, breadcrumbs]}
+>
+	<PageHero
+		kicker={service.hero.kicker}
+		heading={service.hero.heading}
+		lede={service.hero.lede}
+		image={service.hero.image}
+		imageAlt={service.hero.imageAlt}
+		back={{ label: 'All services', href: '/services' }}
+	/>
+
+	<section class="section">
+		<div class="container">
+			<div class="overview">
+				<h2 class="display-3 no-optical">{service.overview.heading}</h2>
+				<div class="prose">
+					{service.overview.body.map((p) => <p set:html={inline(p)} />)}
+				</div>
+			</div>
+		</div>
+	</section>
+
+	{
+		service.detail && (
+			<section class="section band-surface">
+				<div class="container">
+					<header class="section-head">
+						<p class="kicker">{service.detail.kicker}</p>
+						<h2 class="display-3">{service.detail.heading}</h2>
+						{service.detail.intro && <p class="lede">{service.detail.intro}</p>}
+					</header>
+					<div class="detail-list">
+						{service.detail.items.map((item, i) => (
+							<article class="detail-item">
+								<span class="detail-num">{String(i + 1).padStart(2, '0')}</span>
+								<div>
+									<h3 class="detail-title">{item.title}</h3>
+									<p class="detail-body">{item.body}</p>
+								</div>
+							</article>
+						))}
+					</div>
+				</div>
+			</section>
+		)
+	}
+
+	{
+		service.aside && (
+			<section class="section-tight">
+				<div class="container">
+					<aside class="aside">
+						<h2 class="aside-title">{service.aside.heading}</h2>
+						<p class="aside-body">{service.aside.body}</p>
+					</aside>
+				</div>
+			</section>
+		)
+	}
+
+	{
+		related.length > 0 && (
+			<section class="section section-ruled">
+				<div class="container">
+					<p class="kicker">Related</p>
+					<div class="grid grid-3 related-grid">
+						{related.map((r) => (
+							<a class="related-card" href={`/services/${r.slug}`}>
+								<Plate
+									src={r.cardImage}
+									alt={r.cardImageAlt}
+									ratio="3/2"
+									sizes="(max-width: 560px) 100vw, 33vw"
+								/>
+								<h3 class="related-title">{r.name}</h3>
+								<p class="related-body">{r.cardBody}</p>
+							</a>
+						))}
+						<a class="related-card" href="/yacht-delivery">
+							<Plate
+								src={imgChartPlot}
+								alt="A Mercator nautical chart with a course plotted in red"
+								ratio="3/2"
+								sizes="(max-width: 560px) 100vw, 33vw"
+							/>
+							<h3 class="related-title">Yacht delivery</h3>
+							<p class="related-body">
+								The flagship — repositioning sail and power yachts between ports, over the
+								water, under their own power.
+							</p>
+						</a>
+					</div>
+				</div>
+			</section>
+		)
+	}
+
+	<FinalCta
+		kicker="Start here"
+		heading={service.cta.heading}
+		body={service.cta.body}
+		image={service.hero.image}
+		imageAlt={service.hero.imageAlt}
+	/>
+</Layout>
+
+<style>
+	.section-head {
+		max-width: 62ch;
+		margin-bottom: clamp(30px, 4vw, 52px);
+	}
+	.overview {
+		display: grid;
+		grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+		gap: clamp(24px, 5vw, 72px);
+		align-items: start;
+	}
+	.overview .display-3 {
+		max-width: 16ch;
+	}
+	@media (max-width: 860px) {
+		.overview {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.overview .display-3 {
+			max-width: none;
+		}
+	}
+
+	/* — numbered detail list — */
+	.detail-list {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0 clamp(28px, 5vw, 72px);
+	}
+	.detail-item {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: var(--space-4);
+		padding-block: clamp(18px, 2.2vw, 26px);
+		border-top: 1px solid var(--color-divider);
+	}
+	.detail-num {
+		font-family: var(--font-heading);
+		font-size: 15px;
+		font-variant-numeric: tabular-nums;
+		color: color-mix(in srgb, var(--color-accent) 70%, transparent);
+		padding-top: 2px;
+	}
+	.detail-title {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: clamp(17px, 1.6vw, 20px);
+		line-height: 1.25;
+		margin: 0 0 var(--space-2);
+	}
+	.detail-body {
+		margin: 0;
+		font-size: 13.5px;
+		line-height: 1.68;
+		color: color-mix(in srgb, var(--color-text) 78%, transparent);
+	}
+	@media (max-width: 760px) {
+		.detail-list {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	/* — the aside: an accent-ruled panel, stroke not fill — */
+	.aside {
+		border-left: 2px solid var(--color-accent);
+		padding: var(--space-2) 0 var(--space-2) clamp(20px, 3vw, 36px);
+		max-width: 72ch;
+	}
+	.aside-title {
+		font-family: var(--font-heading);
+		font-weight: 400;
+		font-size: clamp(22px, 2.4vw, 30px);
+		line-height: 1.18;
+		margin: 0 0 var(--space-3);
+	}
+	.aside-body {
+		margin: 0;
+		font-size: 15px;
+		line-height: 1.7;
+		color: color-mix(in srgb, var(--color-text) 84%, transparent);
+	}
+
+	/* — related — */
+	.related-grid {
+		margin-top: clamp(22px, 3vw, 34px);
+	}
+	.related-card {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+	}
+	.related-title {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: clamp(18px, 1.7vw, 22px);
+		margin: var(--space-3) 0 var(--space-1);
+	}
+	.related-card:hover .related-title {
+		color: var(--color-accent);
+	}
+	.related-body {
+		margin: 0;
+		font-size: 13.5px;
+		line-height: 1.62;
+		color: color-mix(in srgb, var(--color-text) 76%, transparent);
+	}
+</style>

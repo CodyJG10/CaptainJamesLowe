@@ -1,0 +1,211 @@
+---
+/**
+ * Where we deliver.
+ *
+ * This is the content the old site repeated in the footer of all 40 pages. It
+ * appears exactly once now, and it is searchable — which is what makes it
+ * useful to a person rather than just to a crawler.
+ *
+ * The filter is a few lines of vanilla JS over already-rendered markup: every
+ * region is in the HTML and indexable whether or not the script runs.
+ */
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+import FinalCta from '../components/FinalCta.astro';
+import { areas, areaGroups, areaCount } from '../data/serviceArea';
+import imgSunset from '../assets/cjl/site/sunset-georgetown.jpg';
+
+const title = 'Service Area | Where We Deliver Boats — States, Coasts and Waterways';
+const description = `Yacht delivery across ${areaCount} regions: the Atlantic and Gulf coasts, the Intracoastal, every navigable inland river, the Great Lakes, the Bahamas, the Caribbean and Canada.`;
+---
+
+<Layout {title} {description}>
+	<PageHero
+		kicker="Where we go"
+		heading="Where we deliver."
+		lede="Our yacht delivery service includes, but is not limited to, the following waters. Search for your state, river, city or island — and if it is not listed, ask anyway."
+	/>
+
+	<section class="section">
+		<div class="container">
+			<div class="search-bar">
+				<div class="field search-field">
+					<label for="area-search">Search a state, port, river or island</label>
+					<input
+						class="input"
+						type="search"
+						id="area-search"
+						placeholder="Norfolk, Okeechobee, Bimini, Tennessee River…"
+						autocomplete="off"
+					/>
+				</div>
+				<p class="count" id="area-count" aria-live="polite">{areaCount} regions</p>
+			</div>
+
+			{
+				areaGroups.map((group) => (
+					<div class="group" data-group={group}>
+						<h2 class="group-head">{group}</h2>
+						<div class="areas">
+							{areas
+								.filter((a) => a.group === group)
+								.map((a) => (
+									<article
+										class="area"
+										data-name={a.name.toLowerCase()}
+										data-haystack={[a.name, a.waters, ...a.places].join(' ').toLowerCase()}
+									>
+										<h3 class="area-name">{a.name}</h3>
+										<p class="area-waters">{a.waters}</p>
+										<ul class="area-places">
+											{a.places.map((p) => (
+												<li>{p}</li>
+											))}
+										</ul>
+									</article>
+								))}
+						</div>
+					</div>
+				))
+			}
+
+			<p class="empty" id="area-empty" hidden>
+				No match — but the list is not exhaustive. Ask the captain about your port.
+			</p>
+		</div>
+	</section>
+
+	<FinalCta
+		kicker="Start here"
+		heading="Don’t see your water? Ask anyway."
+		body="The list is where we have been, not where we can go. Ninety percent of all vessel relocations start in Florida, end in Florida, or pass through it — and the rest is reachable."
+		image={imgSunset}
+		imageAlt="Sunset over a marina seen from a boat’s deck, with a piling and dock in view"
+	/>
+</Layout>
+
+<script is:inline>
+	(() => {
+		const input = document.getElementById('area-search');
+		const countEl = document.getElementById('area-count');
+		const emptyEl = document.getElementById('area-empty');
+		if (!input) return;
+
+		const cards = Array.from(document.querySelectorAll('.area'));
+		const groups = Array.from(document.querySelectorAll('.group'));
+		const total = cards.length;
+
+		const apply = () => {
+			const q = input.value.trim().toLowerCase();
+			let shown = 0;
+
+			for (const card of cards) {
+				const hit = !q || card.dataset.haystack.includes(q);
+				card.hidden = !hit;
+				if (hit) shown++;
+			}
+
+			// Hide a group heading when everything under it filtered out.
+			for (const group of groups) {
+				const any = group.querySelector('.area:not([hidden])');
+				group.hidden = !any;
+			}
+
+			countEl.textContent =
+				shown === total ? `${total} regions` : `${shown} of ${total} regions`;
+			emptyEl.hidden = shown !== 0;
+		};
+
+		input.addEventListener('input', apply);
+	})();
+</script>
+
+<style>
+	.search-bar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: end;
+		justify-content: space-between;
+		gap: var(--space-4);
+		padding-bottom: clamp(24px, 3vw, 36px);
+		margin-bottom: clamp(8px, 1vw, 14px);
+		border-bottom: 1px solid var(--color-divider);
+	}
+	.search-field {
+		flex: 1 1 380px;
+		max-width: 520px;
+	}
+	.search-field .input {
+		min-height: 46px;
+		font-size: 16px; /* 16px stops iOS zooming the page on focus */
+	}
+	.count {
+		margin: 0;
+		font-family: var(--font-heading);
+		font-size: 13px;
+		font-variant-numeric: tabular-nums;
+		color: color-mix(in srgb, var(--color-text) 60%, transparent);
+	}
+
+	.group[hidden] {
+		display: none;
+	}
+	.group-head {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: 11px;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--color-accent);
+		margin: clamp(32px, 4vw, 52px) 0 var(--space-4);
+	}
+
+	.areas {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+		gap: 0 clamp(28px, 4vw, 60px);
+	}
+	.area {
+		padding-block: clamp(18px, 2.2vw, 26px);
+		border-top: 1px solid var(--color-divider);
+	}
+	.area[hidden] {
+		display: none;
+	}
+	.area-name {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: clamp(19px, 1.8vw, 23px);
+		line-height: 1.2;
+		margin: 0 0 var(--space-2);
+	}
+	.area-waters {
+		margin: 0 0 var(--space-3);
+		font-size: 13.5px;
+		line-height: 1.65;
+		color: color-mix(in srgb, var(--color-text) 80%, transparent);
+	}
+	.area-places {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px 0;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		font-size: 12.5px;
+		line-height: 1.5;
+		color: color-mix(in srgb, var(--color-text) 58%, transparent);
+	}
+	.area-places li:not(:last-child)::after {
+		content: ' · ';
+		white-space: pre;
+	}
+
+	.empty {
+		margin: clamp(32px, 4vw, 52px) 0 0;
+		padding-top: var(--space-4);
+		border-top: 1px solid var(--color-divider);
+		font-size: 15px;
+		color: color-mix(in srgb, var(--color-text) 70%, transparent);
+	}
+</style>

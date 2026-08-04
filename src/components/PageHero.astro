@@ -1,0 +1,77 @@
+---
+/**
+ * The interior-page hero: an editorial split, kicker rule over display type on
+ * the left, a matted photograph on the right.
+ *
+ * Deliberately NOT the homepage's video hero. That one exists to stop someone
+ * scrolling; this one exists to orient someone who already chose to be here,
+ * and the quiet version does that better.
+ */
+import type { ImageMetadata } from 'astro';
+import Plate from './Plate.astro';
+
+interface Props {
+	kicker: string;
+	heading: string;
+	lede?: string;
+	image?: ImageMetadata;
+	imageAlt?: string;
+	/** Crop for the hero plate. Portraits want 4/5, maps want 4/3. */
+	ratio?: string;
+	/** Breadcrumb-style back link, e.g. { label: 'All services', href: '/services' } */
+	back?: { label: string; href: string };
+}
+
+const { kicker, heading, lede, image, imageAlt = '', ratio = '4/3', back } = Astro.props;
+---
+
+<section class:list={['page-hero', { 'has-image': Boolean(image) }]}>
+	<div class="container">
+		{
+			back && (
+				<a class="back" href={back.href}>
+					<span aria-hidden="true">←</span> {back.label}
+				</a>
+			)
+		}
+		<div class:list={['hero-grid', { split: Boolean(image) }]}>
+			<div class="hero-copy">
+				<p class="kicker">{kicker}</p>
+				<h1 class="display-2">{heading}</h1>
+				{lede && <p class="lede">{lede}</p>}
+				<slot name="actions" />
+			</div>
+			{image && <Plate src={image} alt={imageAlt} ratio={ratio} sizes="(max-width: 860px) 100vw, 42vw" />}
+		</div>
+	</div>
+</section>
+
+<style>
+	.page-hero {
+		padding-block: clamp(34px, 4.5vw, 64px) clamp(40px, 5vw, 72px);
+		border-bottom: 1px solid var(--color-divider);
+	}
+	.back {
+		display: inline-block;
+		font-family: var(--font-heading);
+		font-size: 13px;
+		color: color-mix(in srgb, var(--color-text) 60%, transparent);
+		text-decoration: none;
+		margin-bottom: clamp(20px, 3vw, 34px);
+	}
+	.back:hover {
+		color: var(--color-accent);
+	}
+	.hero-copy .lede {
+		max-width: 56ch;
+	}
+	/* Without a photograph the column would run the full 1240px, which is far
+	   past a comfortable measure — constrain the heading and the lede
+	   separately, since display type wants a much tighter measure than prose. */
+	.hero-grid:not(.split) .display-2 {
+		max-width: 18ch;
+	}
+	.hero-grid:not(.split) .lede {
+		max-width: 60ch;
+	}
+</style>

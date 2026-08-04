@@ -1,0 +1,128 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Plate from '../components/Plate.astro';
+import { site } from '../data/site';
+import imgSunset from '../assets/cjl/site/sunset-georgetown.jpg';
+
+const title = 'Request received | Captain James Lowe Yacht Delivery';
+const description = 'Your delivery request is in. Capt. James reviews every enquiry personally.';
+---
+
+<!-- noindex: a thank-you page has no search value and would only compete with /quote. -->
+<Layout {title} {description} index={false}>
+	<section class="section">
+		<div class="container thanks">
+			<div>
+				<p class="kicker">Received</p>
+				<h1 class="display-2">Thank you — the request is in.</h1>
+				<p class="lede">
+					Capt. James reviews every enquiry personally, and most estimates go back out within
+					24 hours. If the delivery is time-sensitive, call and say so.
+				</p>
+
+				<ol class="next">
+					<li>
+						<h2>The route gets charted</h2>
+						<p>
+							Optimal course allowing for safety, distance, water depth and bridge
+							clearances — worked from the specs you just sent.
+						</p>
+					</li>
+					<li>
+						<h2>The days get counted</h2>
+						<p>
+							Charted distance divided by your vessel’s cruising speed, at 10 to 12 hours of
+							travel a day, plus buffer for weather.
+						</p>
+					</li>
+					<li>
+						<h2>Your estimate arrives by email</h2>
+						<p>
+							No obligation. Once a deposit is received, the estimate becomes the contract
+							and your dates are held.
+						</p>
+					</li>
+				</ol>
+
+				<div class="actions">
+					<a class="btn btn-primary btn-lg" href={site.phoneHref}>Call {site.phoneDisplay}</a>
+					<a class="btn btn-secondary btn-lg" href="/">Back to the site</a>
+				</div>
+
+				<p class="note">
+					Have a survey, documentation or photographs? Reply to the confirmation email with
+					them attached and everything stays on one thread.
+				</p>
+			</div>
+
+			<Plate
+				src={imgSunset}
+				alt="Sunset over a marina seen from a boat’s deck, with a piling and dock in view"
+				ratio="4/5"
+				sizes="(max-width: 860px) 100vw, 40vw"
+			/>
+		</div>
+	</section>
+</Layout>
+
+<style>
+	.thanks {
+		display: grid;
+		grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+		gap: clamp(30px, 5vw, 72px);
+		align-items: center;
+	}
+	@media (max-width: 860px) {
+		.thanks {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	.next {
+		list-style: none;
+		margin: clamp(28px, 3.5vw, 44px) 0;
+		padding: 0;
+		counter-reset: n;
+	}
+	.next li {
+		counter-increment: n;
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: var(--space-4);
+		padding-block: var(--space-4);
+		border-top: 1px solid var(--color-divider);
+	}
+	.next li::before {
+		content: counter(n, decimal-leading-zero);
+		font-family: var(--font-heading);
+		font-size: 14px;
+		font-variant-numeric: tabular-nums;
+		color: var(--color-accent);
+		padding-top: 3px;
+	}
+	.next h2 {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: clamp(17px, 1.6vw, 20px);
+		margin: 0 0 var(--space-1);
+	}
+	.next p {
+		margin: 0;
+		font-size: 13.5px;
+		line-height: 1.65;
+		color: color-mix(in srgb, var(--color-text) 78%, transparent);
+	}
+
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-3);
+	}
+	.note {
+		margin: var(--space-6) 0 0;
+		font-size: 12.5px;
+		line-height: 1.6;
+		max-width: 56ch;
+		color: color-mix(in srgb, var(--color-text) 60%, transparent);
+	}
+</style>

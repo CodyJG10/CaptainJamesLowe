@@ -1,0 +1,240 @@
+---
+/**
+ * Delivery vs transport vs shipping.
+ *
+ * High-intent education page: people searching "yacht transport" often want
+ * delivery and do not yet know the difference. The old site ranked on
+ * /boat_delivery.php for exactly this, which now 301s here.
+ */
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+import FinalCta from '../components/FinalCta.astro';
+import Plate from '../components/Plate.astro';
+import { inline } from '../lib/inline';
+import imgLoading from '../assets/cjl/site/yacht-loaded-on-ship.jpg';
+import imgMotorYachtWake from '../assets/cjl/stock/motor-yacht-underway-wake.jpg';
+import imgChartPlot from '../assets/cjl/stock/nautical-chart-plot.jpg';
+
+const options = [
+	{
+		title: 'Yacht delivery',
+		sub: 'Over the water, by captain',
+		ours: true,
+		body: 'Your vessel moves under her own power, crewed by a captain and deckhands. Coastlines, the Intracoastal, canals, inland rivers and offshore passages. This is what we do, and the only one of the three where your boat arrives having been run, checked and reported on.',
+		good: 'Any vessel that can safely make the passage, especially anything too wide or too tall for the road.',
+		watch: 'Adds engine hours and takes days rather than hours. Fuel, dockage and crew are yours.',
+	},
+	{
+		title: 'Yacht transport',
+		sub: 'Over the road, by truck',
+		ours: false,
+		body: 'The boat is hauled overland on a trailer behind a truck. A different trade with a different licence and a different insurer, and the boat never touches water between the two lifts.',
+		good: 'Smaller boats, and moves between waters that are not connected.',
+		watch: 'Legal road limits. Above 8.5 feet of beam or 13.6 feet of height you are into permits, escorts and cost — or out of the option entirely.',
+	},
+	{
+		title: 'Yacht shipping',
+		sub: 'On the deck of a bigger ship',
+		ours: false,
+		body: 'Your boat rides on a ship. Used for ocean crossings and for moves where neither delivery nor trucking is practical.',
+		good: 'Transoceanic moves, and very large vessels going a very long way.',
+		watch: 'You may still need a captain standing by to pilot the vessel into the loading area when called — that part we can do.',
+	},
+];
+
+const title = 'Yacht Delivery vs Transport vs Shipping | What’s the Difference?';
+const description =
+	'Delivery moves your boat over the water under her own power. Transport hauls her on a truck. Shipping puts her on a bigger boat. Which one you need, and what decides it.';
+---
+
+<Layout {title} {description}>
+	<PageHero
+		kicker="Know what you are buying"
+		heading="Delivery, transport, shipping — three different things."
+		lede="These three get used interchangeably, including by people selling them. They are not interchangeable, they cost different amounts, and only one of them involves your boat running under her own power."
+		image={imgLoading}
+		imageAlt="A yacht being lifted and loaded onto the deck of a transport ship"
+	/>
+
+	<section class="section">
+		<div class="container">
+			<div class="options">
+				{
+					options.map((o) => (
+						<article class:list={['option', { 'option-ours': o.ours }]}>
+							<header class="option-head">
+								<p class="option-flag">{o.ours ? 'What we do' : 'A different trade'}</p>
+								<h2 class="option-title">{o.title}</h2>
+								<p class="option-sub">{o.sub}</p>
+							</header>
+							<p class="option-body">{o.body}</p>
+							<dl class="option-meta">
+								<div>
+									<dt>Best for</dt>
+									<dd>{o.good}</dd>
+								</div>
+								<div>
+									<dt>Watch out for</dt>
+									<dd>{o.watch}</dd>
+								</div>
+							</dl>
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<section class="section band-surface">
+		<div class="container split">
+			<div>
+				<p class="kicker">The deciding number</p>
+				<h2 class="display-3 no-optical">Beam and air draft settle most of it.</h2>
+				<div class="prose">
+					<p set:html={inline(
+						'A boat wider than **8.5 feet** or taller than **13.6 feet** on the trailer is over standard highway dimensions. Past that, trucking means permits, escort vehicles and a route planned around bridges — and for a lot of cruising boats it stops being an option at all. Those boats go over the water.',
+					)} />
+					<p>
+						Under those dimensions, trucking is often faster and adds no hours to your engines,
+						which is why it exists. The honest answer is that the right choice depends on the
+						boat, the distance and what you value — and we will tell you when trucking is the
+						better call, even though it is not the call that hires us.
+					</p>
+				</div>
+			</div>
+			<Plate
+				src={imgMotorYachtWake}
+				alt="A flybridge motor yacht underway on open water, throwing a wake"
+				ratio="4/3"
+				sizes="(max-width: 860px) 100vw, 45vw"
+			/>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<aside class="aside">
+				<h2 class="aside-title">What delivery gets you that the other two do not</h2>
+				<p class="aside-body">
+					Several days of your boat being run hard by someone who knows what they are listening
+					for. Every delivery ends with an observations and recommendations report, and it
+					routinely surfaces things a dockside survey never will — a gearbox that slips when
+					it is hot, a charging fault that only shows after eight hours, a bilge pump cycling
+					more than it should. On a boat you have just bought, that is worth something on its
+					own.
+				</p>
+			</aside>
+		</div>
+	</section>
+
+	<FinalCta
+		kicker="Start here"
+		heading="Not sure which one your boat needs?"
+		body="Send her dimensions and the two ports. If delivery is wrong for the job, I will say so."
+		image={imgChartPlot}
+		imageAlt="A Mercator nautical chart with a course plotted in red"
+	/>
+</Layout>
+
+<style>
+	.options {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: clamp(20px, 3vw, 36px);
+	}
+	@media (max-width: 900px) {
+		.options {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+	.option {
+		display: flex;
+		flex-direction: column;
+		border: 1px solid var(--color-divider);
+		border-radius: var(--radius-md);
+		padding: clamp(22px, 2.8vw, 34px);
+	}
+	.option-ours {
+		border-color: var(--color-accent);
+	}
+	.option-head {
+		padding-bottom: var(--space-4);
+		margin-bottom: var(--space-4);
+		border-bottom: 1px solid var(--color-divider);
+	}
+	.option-flag {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: 10px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: color-mix(in srgb, var(--color-text) 50%, transparent);
+		margin: 0 0 var(--space-3);
+	}
+	.option-ours .option-flag {
+		color: var(--color-accent);
+	}
+	.option-title {
+		font-family: var(--font-heading);
+		font-weight: 400;
+		font-size: clamp(25px, 2.6vw, 34px);
+		line-height: 1.1;
+		margin: 0 0 var(--space-1);
+	}
+	.option-sub {
+		margin: 0;
+		font-size: 12.5px;
+		letter-spacing: 0.02em;
+		color: color-mix(in srgb, var(--color-text) 60%, transparent);
+	}
+	.option-body {
+		margin: 0 0 var(--space-4);
+		font-size: 14px;
+		line-height: 1.68;
+		flex: 1;
+	}
+	.option-meta {
+		margin: 0;
+	}
+	.option-meta > div {
+		padding-top: var(--space-3);
+		border-top: 1px solid var(--color-divider);
+	}
+	.option-meta > div + div {
+		margin-top: var(--space-3);
+	}
+	.option-meta dt {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: 10px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--color-accent);
+		margin-bottom: var(--space-1);
+	}
+	.option-meta dd {
+		margin: 0;
+		font-size: 12.5px;
+		line-height: 1.6;
+		color: color-mix(in srgb, var(--color-text) 76%, transparent);
+	}
+
+	.aside {
+		border-left: 2px solid var(--color-accent);
+		padding: var(--space-2) 0 var(--space-2) clamp(20px, 3vw, 36px);
+		max-width: 76ch;
+	}
+	.aside-title {
+		font-family: var(--font-heading);
+		font-weight: 400;
+		font-size: clamp(22px, 2.4vw, 32px);
+		line-height: 1.16;
+		margin: 0 0 var(--space-3);
+	}
+	.aside-body {
+		margin: 0;
+		font-size: 15px;
+		line-height: 1.7;
+		color: color-mix(in srgb, var(--color-text) 84%, transparent);
+	}
+</style>

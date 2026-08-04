@@ -1,0 +1,75 @@
+# 301s from the old hand-coded PHP site.
+#
+# Cloudflare Pages / Netlify `_redirects` format. Every URL in the old
+# sitemap.xml is accounted for — ten years of links and rankings sit on these
+# paths, and a 404 throws that away.
+#
+# Mirror these rules on any other host.
+
+# ── core pages ──
+/index.php                                  /                                     301
+/james.php                                  /captain                              301
+/yacht_delivery.php                         /yacht-delivery                       301
+/yacht_delivery_rates_fees.php              /rates                                301
+/FAQ.php                                    /faq                                  301
+/contact.php                                /quote                                301
+/Delivery_Contract.php                      /quote                                301
+/Email_James.php                            /quote                                301
+/sitemap.php                                /service-area                         301
+
+# ── services ──
+/boat_handling.php                          /services/hands-on-training           301
+/Insurance_Sign_Off_By_Captain.php          /services/insurance-check-rides       301
+/Relief_Captain.php                         /services/relief-captain              301
+/captain_for_hire.php                       /services/captain-for-hire            301
+/Sailboat_Delivery_Captain.php              /services/sailboat-delivery           301
+
+# ── waters of special expertise ──
+/Great_Loop.php                             /passages/great-loop                  301
+/Bahamas_Crossing.php                       /passages/bahamas-crossing            301
+/okeechobee_waterway.php                    /passages/okeechobee-waterway         301
+/Inland_Rivers.php                          /passages/inland-rivers               301
+/Gulf_Crossing_Floridas_Big_Bend.php        /passages/gulf-big-bend-crossing      301
+/Florida_Captain.php                        /passages/florida                     301
+
+# ── proof and process ──
+/recent_captain.yacht_delivery_jobs.php     /deliveries                           301
+/boat_yacht_delivery_summary.php            /yacht-delivery                       301
+
+# ── SEO landing pages ──
+# boat_delivery.php was the delivery-vs-transport explainer, not a hub page.
+/boat_delivery.php                          /delivery-vs-transport                301
+/boat_delivery_services_near_me.php         /service-area                         301
+/fort_lauderdale.php                        /service-area                         301
+
+# ── business and legal ──
+/payments.php                               /payments                             301
+/privacy.php                                /privacy                              301
+/disclaimer.php                             /disclaimer                           301
+
+# ── retired pages ──
+# The crew page said "We are NOT hiring at this time"; the job application page
+# said not to call about jobs. Both fold into the captain's bio rather than
+# 404ing, since the inbound links are real.
+/deckhand_engineer.php                      /captain                              301
+/Captain-Deckhand-Job-Application.php       /captain                              301
+# The mailing list, resources list, reciprocal-links directory and the
+# webmaster page have no equivalent — they go to the homepage.
+/join_mailing_list.php                      /                                     301
+/resources.php                              /                                     301
+/reciprocal_links.php                       /                                     301
+/webmaster.php                              /                                     301
+# TODO(launch): weddings and mobile notary. The old site advertised these in
+# two places that contradicted each other (East Orlando vs. the Panhandle) and
+# James has not yet said whether to carry the service over. Pointed at the
+# homepage for now; give them a real page or leave them here.
+/weddings.php                               /                                     301
+/Notary.Public.East.Orlando_Florida.php     /                                     301
+
+# ── the old form ──
+/rackforms/*                                /quote                                301
+
+# ── catch the rest of the .php surface ──
+# Anything still ending in .php that was not listed above lands on the homepage
+# rather than a 404. Kept last so the specific rules above win.
+/*.php                                      /                                     301

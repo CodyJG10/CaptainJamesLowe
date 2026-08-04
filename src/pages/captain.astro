@@ -1,0 +1,271 @@
+---
+/**
+ * The bio. On the old site this was the strongest writing anywhere — a real
+ * voice, a real career — and it opened with an apology for the site's own
+ * keyword stuffing. The apology is gone; the voice is kept, because it is the
+ * reason people call him rather than the other guy.
+ */
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+import FinalCta from '../components/FinalCta.astro';
+import Plate from '../components/Plate.astro';
+import { site } from '../data/site';
+import { deliveryCount } from '../data/deliveries';
+import { inline } from '../lib/inline';
+
+import imgCaptain from '../assets/cjl/site/captain-james-lowe-florida.jpg';
+import imgShipsAtAnchor from '../assets/cjl/site/ships-at-anchor.jpg';
+import imgSunset from '../assets/cjl/site/sunset-georgetown.jpg';
+
+const credentials = [
+	'U.S. Citizen, Florida resident',
+	'Current U.S. passport',
+	'Current TWIC card',
+	`USCG Mariner Reference Number ${site.marinerRef}`,
+	'Honorably discharged U.S. Navy veteran',
+	'Non-smoker',
+];
+
+const certifications = [
+	'Master 200 GRT Near Coastal, Auxiliary Sail',
+	'Able Seaman, Any Waters',
+	'Radar Observer, Unlimited',
+	'ARPA — Automatic Radar Plotting Aids',
+	'ECDIS — Electronic Chart Display Information Systems',
+	'GMDSS — Global Maritime Distress and Safety Systems',
+	'GMDSS FCC Operator’s License',
+	'Lifeboatman',
+	'RFPNW — Rating Forming Part of a Navigational Watch',
+	'Full STCW',
+	'Advanced Fire Fighting',
+	'Medical Care Provider',
+	'DPO — Dynamic Positioning Operator',
+	'Flashing Lights (Morse code)',
+	'Bridge Resource Management',
+	'FCC Amateur Extra, W4WZW',
+	'NAUI Rescue Diver',
+];
+
+const story = [
+	'I am a sailor now, but I started boating as a child and carried it into the Navy as a young adult. After my honorable discharge I spent a few years contracting — painting and power washing — while keeping a captain’s license and never really getting off the water.',
+	'Then I went full time into the maritime industry, working offshore in oil and gas, which is what pushed me to upgrade my Coast Guard ticket. I started on ships as an AB, an able-bodied seaman, and then ran crew boats as master, taking men and supplies between the dock and the rigs. Twenty-eight days straight for fourteen days off. It is a job that can take the fun out of a life.',
+	'After the oil patch there were some short-term captain jobs. The only one worth mentioning is a relief position running pilot boats — the little boats that crash into moving ships so a harbor pilot can step across. That is a story for a longer conversation.',
+	'What all of it added up to is a working knowledge of boats that goes past driving them. Personal ownership, refits, and years in the marine service industry mean I understand vessel maintenance, brightwork, and electrical and mechanical systems. I have rigged sailboats. I have commanded offshore supply vessels over 200 feet carrying passengers at speed in the Gulf. Safety, preventive maintenance and training were the job, not an afterthought to it.',
+];
+
+const closing = [
+	'I have a natural inclination toward humor. I like making people laugh, and I laugh at their jokes. I am easy to talk to and happy to talk — after my morning coffee.',
+	`For the past several years I have been running deliveries, and I have overseen the safe relocation of a great many private motor and sailing vessels. ${deliveryCount} of them are documented in the log on this site. I also teach: vessel handling, navigation, and the orientation a new owner needs on a boat they have just bought.`,
+	'I want to be straight about what this work is. The idea of yacht delivery sounds romantic. In practice it is long, demanding days aboard. Sometimes the weather is bad and the seas build, sometimes the boat is not running right, and a lot of boats were never designed for comfort — which you feel after hours and then days of it.',
+	'We are not one of the crews you have heard about, the ones who take a job and quit two days in and leave you stranded. **I know what I am signing up for. I have done it for years, and I have never quit a delivery.**',
+];
+
+const title = 'Capt. James Lowe | USCG 200-Ton Licensed Master, Yacht Delivery';
+const description =
+	'Meet Captain James Lowe — USCG 200-ton licensed master, Navy veteran, former offshore supply vessel captain, and the person who will actually be aboard your delivery.';
+
+const personSchema = {
+	'@type': 'Person',
+	'@id': `${site.url}/captain#person`,
+	name: 'James Lowe',
+	alternateName: 'Capt. James',
+	jobTitle: 'USCG 200-Ton Licensed Master',
+	description,
+	worksFor: { '@id': `${site.url}/#business` },
+	knowsAbout: [
+		'Yacht delivery',
+		'Boat handling instruction',
+		'Marine navigation',
+		'Coastal and offshore passage planning',
+	],
+	sameAs: [site.socials.linkedin, site.socials.instagram],
+};
+---
+
+<Layout {title} {description} jsonLd={[personSchema]}>
+	<PageHero
+		kicker="Hi, I’m Capt. James"
+		heading="Getting other people’s boats home."
+		lede="Most people call me Capt. James. Captain Lowe is more accurate, but we can skip that. I hold a USCG 200-ton master’s ticket and run deliveries year-round out of central Florida — sailboats and power, trawlers and cruisers, sportfishermen and motor yachts."
+		image={imgCaptain}
+		imageAlt="Captain James Lowe, white-bearded in sunglasses and a well-worn cap, smiling aboard a sailboat"
+		ratio="4/5"
+	/>
+
+	<section class="section">
+		<div class="container bio">
+			<div class="prose">
+				{story.map((p) => <p set:html={inline(p)} />)}
+			</div>
+			<aside class="creds">
+				<h2 class="creds-head">The basics</h2>
+				<ul class="creds-list">
+					{credentials.map((c) => <li>{c}</li>)}
+				</ul>
+			</aside>
+		</div>
+	</section>
+
+	<section class="section-tight">
+		<div class="container figure-wrap">
+			<Plate
+				src={imgShipsAtAnchor}
+				alt="Commercial ships at anchor in grey haze, with more vessels on the horizon"
+				caption="Years in the oil patch and on crew boats — before the deliveries."
+				ratio="16/9"
+				sizes="(max-width: 860px) 100vw, 70vw"
+			/>
+		</div>
+	</section>
+
+	<section class="section band-surface">
+		<div class="container">
+			<header class="section-head">
+				<p class="kicker">Training and certification</p>
+				<h2 class="display-3">Seventeen tickets, and the reason they matter.</h2>
+				<p class="lede">
+					Most of these are not required to move a private yacht. They are here because the
+					commercial side of the industry demanded them, and because they are what separates
+					someone who has run ships from someone who has run boats.
+				</p>
+			</header>
+			<ul class="certs">
+				{certifications.map((c) => <li class="cert">{c}</li>)}
+			</ul>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container prose prose-wide">
+			{closing.map((p) => <p set:html={inline(p)} />)}
+		</div>
+	</section>
+
+	<section class="section-tight">
+		<div class="container">
+			<blockquote class="pull">
+				<p class="pull-line">You got a boat, you need to move it — I’m your guy.</p>
+				<p class="pull-sub">
+					“In a world of boats, it’s my yacht. But in the world of yachts, it’s only my boat.”
+				</p>
+			</blockquote>
+		</div>
+	</section>
+
+	<FinalCta
+		kicker="Start here"
+		heading="Let’s talk about your boat."
+		body="Send the vessel and the route through the delivery form, or just call. Either one reaches me, not a dispatch desk."
+		image={imgSunset}
+		imageAlt="Sunset over a marina seen from a boat’s deck, with a piling and dock in view"
+	/>
+</Layout>
+
+<style>
+	.section-head {
+		max-width: 62ch;
+		margin-bottom: clamp(30px, 4vw, 52px);
+	}
+
+	.bio {
+		display: grid;
+		grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+		gap: clamp(30px, 5vw, 76px);
+		align-items: start;
+	}
+	@media (max-width: 900px) {
+		.bio {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	.creds {
+		border: 1px solid var(--color-divider);
+		border-radius: var(--radius-md);
+		padding: clamp(20px, 2.4vw, 28px);
+	}
+	.creds-head {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: 11px;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--color-accent);
+		margin: 0 0 var(--space-4);
+		padding-bottom: var(--space-2);
+		border-bottom: 1px solid var(--color-divider);
+	}
+	.creds-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.creds-list li {
+		padding-block: var(--space-3);
+		border-bottom: 1px solid var(--color-divider);
+		font-size: 13.5px;
+		line-height: 1.5;
+	}
+	.creds-list li:last-child {
+		border-bottom: 0;
+		padding-bottom: 0;
+	}
+
+	.certs {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0 clamp(24px, 4vw, 56px);
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.cert {
+		padding-block: var(--space-3);
+		border-top: 1px solid var(--color-divider);
+		font-size: 14px;
+		line-height: 1.5;
+	}
+	@media (max-width: 860px) {
+		.certs {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+	@media (max-width: 560px) {
+		.certs {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	.prose-wide {
+		max-width: 74ch;
+	}
+
+	.figure-wrap {
+		max-width: 980px;
+	}
+
+	/* — the taglines, given the weight they earned — */
+	.pull {
+		margin: 0;
+		border-top: 1px solid var(--color-divider);
+		border-bottom: 1px solid var(--color-divider);
+		padding-block: clamp(32px, 4.5vw, 60px);
+		text-align: center;
+	}
+	.pull-line {
+		font-family: var(--font-heading);
+		font-weight: 400;
+		font-size: clamp(28px, 4vw, 54px);
+		line-height: 1.12;
+		margin: 0 auto var(--space-4);
+		max-width: 18ch;
+	}
+	.pull-sub {
+		margin: 0 auto;
+		max-width: 52ch;
+		font-size: 15px;
+		font-style: italic;
+		line-height: 1.6;
+		color: color-mix(in srgb, var(--color-text) 62%, transparent);
+	}
+</style>
