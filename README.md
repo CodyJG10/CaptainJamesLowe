@@ -56,6 +56,7 @@ understating a ten-day job by about 20%.
 | `scripts/optimize-photos.mjs` | EXIF-rotates, caps dimensions, recompresses into `src/assets/cjl/` |
 | `scripts/generate-brand-assets.mjs` | Favicons, `.ico`, webmanifest and the 1200×630 OG card, all from the logo + brand ink |
 | `scripts/shoot.mjs` | Full-page screenshots via headless Chrome — for review, not part of the build |
+| `scripts/check-contrast.mjs` | Walks every page for text that is unreadable against its background. Run it after touching colour |
 
 ---
 
@@ -71,6 +72,12 @@ ground. The rules that make it cohere:
 
 - **Color is stroke, not fill.** Buttons are outlined, cards are bordered.
   Nothing gets filled with accent.
+- **Three accent tokens, and they are not interchangeable.** `--color-accent`
+  is the *stroke* — borders, rules, outlines, where 3:1 is the right bar and it
+  passes. Text uses `--color-accent-text` (the deep ramp step, clears 4.5:1);
+  large gold figures use `--color-accent-display`. All three re-point up the
+  ramp inside `.band-ink`. Reaching for `--color-accent` as a text color is the
+  mistake this split exists to prevent.
 - **Hairlines carry structure.** `var(--color-divider)` between sections.
 - **Every content photograph goes through `.plate`** (`src/components/Plate.astro`)
   — a 6px surface mat, a hairline outline, and a warm archival grade.

@@ -67,6 +67,29 @@
 	--color-accent-2-800: #573d14;
 	--color-accent-2-900: #382810;
 
+	/*
+	 * Accent used as TEXT, as opposed to as a stroke.
+	 *
+	 * The system's own guidance: "The accent-to-ground pair is tuned to at
+	 * least 3:1 — enough for icons, large text and interface chrome, not for
+	 * body copy — so for paragraph-size text in the accent use a deep ramp
+	 * step rather than the accent itself."
+	 *
+	 * --color-accent stays the stroke colour (borders, rules, outlines), where
+	 * 3:1 is the correct bar for a UI component. These two carry text:
+	 *
+	 *   --color-accent-text     small text (kickers, links, tags, buttons) —
+	 *                           needs 4.5:1, and the base accent gives 3.0 on
+	 *                           the page ground and only 2.8 on the surface band
+	 *   --color-accent-display  figures set at 24px+ , where 3:1 is the bar and
+	 *                           keeping the gold legible matters more
+	 *
+	 * Both are re-pointed up the ramp inside .band-ink, where the ground is
+	 * dark and the relationship inverts.
+	 */
+	--color-accent-text: var(--color-accent-700);
+	--color-accent-display: var(--color-accent-600);
+
 	--font-heading: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
 	--font-heading-weight: 600; /* semibold is the interface ceiling; display
 	   text goes lighter still, to the normal cut — see .display-* below */
@@ -169,7 +192,7 @@ p {
 	margin: 0 0 var(--space-3);
 }
 a {
-	color: var(--color-accent);
+	color: var(--color-accent-text);
 	text-underline-offset: 3px;
 }
 img {
@@ -222,7 +245,7 @@ figcaption {
 	background: var(--color-bg);
 	border: 1px solid var(--color-accent);
 	border-radius: var(--radius-md);
-	color: var(--color-accent);
+	color: var(--color-accent-text);
 	font-family: var(--font-heading);
 	text-decoration: none;
 	transition: top 0.18s ease;
@@ -279,7 +302,7 @@ figcaption {
 	cursor: not-allowed;
 }
 .btn-primary {
-	color: var(--color-accent);
+	color: var(--color-accent-text);
 	border-color: var(--color-accent);
 }
 .btn-primary:hover {
@@ -298,7 +321,7 @@ figcaption {
 	background: color-mix(in srgb, var(--color-text) 14%, transparent);
 }
 .btn-ghost {
-	color: var(--color-accent);
+	color: var(--color-accent-text);
 	padding-inline: var(--space-1);
 }
 .btn-ghost:hover {
@@ -444,7 +467,7 @@ select.input {
 	border-left: 1px solid var(--color-divider);
 }
 .seg-opt:has(input:checked) {
-	color: var(--color-accent);
+	color: var(--color-accent-text);
 	box-shadow: inset 0 0 0 1px var(--color-accent);
 }
 .seg-opt:not(:has(input:checked)):hover {
@@ -469,7 +492,7 @@ select.input {
 	font-size: 10px;
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
-	color: var(--color-accent);
+	color: var(--color-accent-text);
 }
 .card-title {
 	font-family: var(--font-heading);
@@ -523,7 +546,7 @@ select.input {
 }
 .tag-outline {
 	border: 1px solid var(--color-accent);
-	color: var(--color-accent);
+	color: var(--color-accent-text);
 }
 
 /* — tables — */
@@ -586,19 +609,23 @@ select.input {
    components (.btn, .card, .hr, .table) keep working inside it unchanged. */
 .band-ink {
 	background: var(--ink-deep);
-	color: var(--color-bg);
+	/*
+	 * NOTE the order trap here: this rule also redefines --color-bg (so nested
+	 * components that paint their own surfaces get the ink one). Custom
+	 * properties resolve to their FINAL value in the rule regardless of where
+	 * they are declared, so `color: var(--color-bg)` would compute to the ink
+	 * colour — invisible text on an identical background. It must read from
+	 * --color-text, which is the paper colour below.
+	 */
 	--color-text: #f3f2f2;
 	--color-divider: color-mix(in srgb, #f3f2f2 20%, transparent);
 	--color-accent: var(--color-accent-400);
+	/* On ink the relationship inverts — the light ramp steps are the readable
+	   ones, and 300 clears 4.5:1 against #1b1a18. */
+	--color-accent-text: var(--color-accent-300);
+	--color-accent-display: var(--color-accent-400);
 	--color-bg: var(--ink-deep);
-}
-.band-ink h1,
-.band-ink h2,
-.band-ink h3,
-.band-ink h4,
-.band-ink h5,
-.band-ink h6 {
-	color: #f3f2f2;
+	color: var(--color-text);
 }
 
 /* — display type — the marketing scale above the DS's interface scale.
@@ -641,7 +668,7 @@ select.input {
 	font-size: 11px;
 	letter-spacing: 0.16em;
 	text-transform: uppercase;
-	color: var(--color-accent);
+	color: var(--color-accent-text);
 	margin: 0 0 var(--space-3);
 }
 
@@ -748,7 +775,7 @@ select.input {
 	font-family: var(--font-heading);
 	font-weight: var(--font-heading-weight);
 	font-size: 14px;
-	color: var(--color-accent);
+	color: var(--color-accent-text);
 	text-decoration: none;
 	border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
 	padding-bottom: 2px;
@@ -783,7 +810,7 @@ select.input {
 	font-weight: 400;
 	font-size: clamp(28px, 3vw, 40px);
 	line-height: 1;
-	color: var(--color-accent);
+	color: var(--color-accent-display);
 	margin-bottom: var(--space-2);
 }
 .stat-label {
