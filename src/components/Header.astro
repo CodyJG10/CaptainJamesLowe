@@ -93,6 +93,11 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
 		--color-text: #f3f2f2;
 		--color-divider: color-mix(in srgb, #f3f2f2 22%, transparent);
 		--color-accent: var(--color-accent-300);
+		/* Over the video the ground is dark, so the text accents have to invert
+		   up the ramp exactly as they do in .band-ink. Without these they stay
+		   at accent-700 — a dark brown on dark footage. */
+		--color-accent-text: var(--color-accent-300);
+		--color-accent-display: var(--color-accent-300);
 		color: #f3f2f2;
 	}
 
